@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  data-mapper:
+    build:
+      dockerfile: data-mapper/Dockerfile
+      context: .
+    volumes:
+      - type: volume
+        source: data-share
+        target: /src/data-vol
+    command: ["python3", "mapper.py"]
+
+  png-mapper:
+    build:
+      dockerfile: png-mapper/Dockerfile
+      context: .
+    volumes:
+      - type: bind
+        source: ./
+        target: /base/images
+      - type: volume
+        source: data-share
+        target: /mapper/vol
+    entrypoint: /bin/sh
+    command: ["-c", "cd /mapper/ && sh ./build.sh"]
+    stdin_open: true
+    tty: true
+volumes:
+    data-share:
