@@ -1,9 +1,9 @@
 #!/bin/bash
-
+#tree /spack
 cd src/ || exit
 mkdir build images
-cd build || exit
-cmake ../..
+cd build/ || exit
+cmake ../../
 make
 chmod 755 png_mapper_exe
 

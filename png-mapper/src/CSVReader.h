@@ -1,11 +1,10 @@
-//
-// Created by adam slay on 12/13/22.
-//
-#include <vector>
+
 #include <string>
+#include <vector>
+
+
 #ifndef PNG_MAPPER_EXE_CSVREADER_H
 #define PNG_MAPPER_EXE_CSVREADER_H
-
 
 class CSVReader {
 public:
@@ -15,6 +14,5 @@ public:
 
     static std::vector<std::vector<std::string>> get_wind(const std::vector<std::vector<std::string>> &data);
 };
-
 
 #endif //PNG_MAPPER_EXE_CSVREADER_H

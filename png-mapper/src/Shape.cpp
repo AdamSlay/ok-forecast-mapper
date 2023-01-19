@@ -1,10 +1,12 @@
-// Created by adam slay on 11/28/22.
+
 #include <bit>
 #include <iostream>
+
 #include "Shape.h"
 
 using std::cout;
 using std::endl;
+
 
 Shape::Shape(const std::string &fn) {
     filename = fn;

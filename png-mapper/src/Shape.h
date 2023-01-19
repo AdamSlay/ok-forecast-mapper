@@ -1,10 +1,11 @@
-// Created by adam slay on 11/28/22.
+
+#include <fstream>
 #include <string>
 #include <vector>
-#include <fstream>
 
 #ifndef SHP_PARSER_SHAPE_H
 #define SHP_PARSER_SHAPE_H
+
 
 class Shape {
 private:

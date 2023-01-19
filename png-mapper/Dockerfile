@@ -10,7 +10,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       clang \
       gdb
 RUN git clone -c feature.manyFiles=true https://github.com/spack/spack.git
-RUN cd spack/bin && ./spack install pngwriter
+RUN rm spack/etc/spack/defaults/config.yaml
+COPY png-mapper/etc/config.yaml spack/etc/spack/defaults
+RUN cd spack/bin && ./spack install pngwriter@0.7.0
 
 
 FROM base as builder

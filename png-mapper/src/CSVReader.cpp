@@ -1,12 +1,11 @@
-//
-// Created by adam slay on 12/13/22.
-//
 
-#include "CSVReader.h"
 #include <fstream>
-#include <sstream>
 #include <iostream>
 #include <string>
+#include <sstream>
+
+#include "CSVReader.h"
+
 
 std::vector<std::vector<std::string>> CSVReader::read_csv(const std::string& fn){
     std::ifstream file(fn);
@@ -41,6 +40,7 @@ std::vector<std::vector<std::string>> CSVReader::get_temp(const std::vector<std:
     }
     return temp;
 }
+
 std::vector<std::vector<std::string>> CSVReader::get_wind(const std::vector<std::vector<std::string>> &data){
     std::vector<std::vector<std::string>> wind;
     for (const std::vector<std::string> &line: data) {

@@ -1,14 +1,15 @@
 import asyncio
 import csv
-import os
-import aiohttp
-import socket
-import requests
-import pandas as pd
-
 from datetime import datetime
+import os
+import socket
+
+import aiohttp
 from colorama import Fore
 from meteostat import Stations
+from pandas import DataFrame
+import requests
+
 from api import Forecast
 
 oklahoma = [["Oklahoma", "OK", "40"]]
@@ -37,7 +38,7 @@ async def main() -> int:
 
 async def loop(state: list) -> None:
     """
-    Async loop that controls program runtime.
+    Async loop that controls program runtime
     :param state: List that includes ["State Name", "State Abbreviation", "State FP Code"]
     :return: None
     """
@@ -49,7 +50,7 @@ async def loop(state: list) -> None:
     await task
 
 
-def create_df(state_abv: str) -> pd.DataFrame:
+def create_df(state_abv: str) -> DataFrame:
     """
     Use the Stations class from meteostat to fetch station data for every available station within the given state
     If station data is currently unavailable, prune from DataFrame
@@ -68,11 +69,11 @@ def create_df(state_abv: str) -> pd.DataFrame:
         print(Fore.RED + f"Error in create_df while working on {state_abv}: {e}")
 
 
-async def fetch_data(stations: pd.DataFrame, state_abv: str) -> None:
+async def fetch_data(stations: DataFrame, state_abv: str) -> None:
     """
     Iterate through the stations within each state and fetch the forecast data from
     api.weather.gov. After fetching the data, create a .csv file and save that file to the
-    shared volume.
+    shared volume
     :param stations: Pandas DataFrame of the station data for each station in the given state
     :param state_abv: 2-letter abbreviation of the state currently being iterated
     :return: None
@@ -98,14 +99,10 @@ async def fetch_data(stations: pd.DataFrame, state_abv: str) -> None:
             forecast_url = await api_req.get_json()
 
             if forecast_url:
-                try:
-                    await api_req.get_forecast(forecast_url, stat_data)
-                    # forecast_args order: temp, windSp, windDir, lat, lon
-                except Exception as e:
-                    print(Fore.RED + f"{e}")
-                    stat_data.append([None, None, None, loc["latitude"], loc["longitude"]])
+                await api_req.get_forecast(forecast_url, stat_data)
+                # forecast_args order: temp, windSp, windDir, lat, lon
             else:
-                stat_data.append([None, None, None, loc["latitude"], loc["longitude"]])
+                stat_data.append([1000, 1000, 1000, loc["latitude"], loc["longitude"]])
 
     # Write data to csv and save to shared vol
     fn = f"{state_abv}-{hour}.csv"
@@ -136,5 +133,5 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
         command_request('png-mapper', 8000, 'png_mapper_exe')
-    except Exception as e:
-        print(f"There was an exception in mapper.py: {e}")
+    except Exception as ex:
+        print(f"There was an exception in mapper.py: {ex}")

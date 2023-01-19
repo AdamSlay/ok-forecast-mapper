@@ -1,11 +1,12 @@
-#include <iostream>
-#include <vector>
 #include <cmath>
+#include <iostream>
 #include <string>
+#include <vector>
 
-#include "Shape.h"
-#include "CSVReader.h"
 #include "pngwriter.h"
+
+#include "CSVReader.h"
+#include "Shape.h"
 
 using std::cout;
 using std::cerr;
@@ -48,11 +49,16 @@ void draw_temp(const std::vector<std::vector<std::vector<double>>> &shapes,
             int Y = 480 - getY(std::stod(line[1]));
             // sub Y value from height(480) bc PNGwriter uses origin at bottom left rather than top left like every other graphics lib
             int temp_int = std::stoi(line[0]);
-            int temp_col = map_value(temp_int, -30, 130);
-            auto r = static_cast<double>(red[temp_col]);
-            auto g = static_cast<double>(green[temp_col]);
-            auto b = static_cast<double>(blue[temp_col]);
-            image.filledcircle_blend(X,Y,30,0.5,r,g,b);
+            if (temp_int != 1000){  // -1000 represents invalid response
+                int temp_col = map_value(temp_int, -30, 130);
+                auto r = static_cast<double>(red[temp_col]);
+                auto g = static_cast<double>(green[temp_col]);
+                auto b = static_cast<double>(blue[temp_col]);
+                image.filledcircle_blend(X,Y,30,0.5,r,g,b);
+            }
+            else {
+                image.filledcircle(X,Y,3,1.0,0.0,0.0);
+            }
         }
     }
 
@@ -73,12 +79,14 @@ void draw_temp(const std::vector<std::vector<std::vector<double>>> &shapes,
     for (const std::vector<std::string> &line: temp) {
         for (const std::string &val: line) {
             // using const_cast because plot_text() won't accept const char*
-            char *fn = const_cast<char *>("/mapper/data/fonts/Nexa-Light.ttf");
+            char *fontf = const_cast<char *>("/mapper/data/fonts/Nexa-Light.ttf");
             int X = getX(std::stod(line[2]));
             // sub Y value from height(480) bc PNGwriter uses origin at bottom left rather than top left like every other graphics lib
             int Y = 480 - getY(std::stod(line[1]));
             char *tchar = const_cast<char *>(line[0].c_str());
-            image.plot_text(fn, 10, X, Y, 0, tchar, 0.0, 0.0, 0.0);
+            if (line[0] != "1000"){
+                image.plot_text(fontf, 10, X, Y, 0, tchar, 0.0, 0.0, 0.0);
+            }
         }
     }
     image.close();
@@ -89,7 +97,6 @@ void draw_wind(const std::vector<std::vector<std::vector<double>>> &shapes,
     pngwriter image(720,480,1.0,"/base/images/wind.png");
 
     // Render data - render data first so shp outline goes over it
-    char *fontf = const_cast<char *>("/mapper/data/fonts/Nexa-Light.ttf");
     for (const std::vector<std::string> &line: wind) {
         for (const std::string &val: line) {
             // Render text of value at (lat, lon)
@@ -97,9 +104,17 @@ void draw_wind(const std::vector<std::vector<std::vector<double>>> &shapes,
             int X = getX(std::stod(line[3]));
             // sub Y value from height(480) bc PNGwriter uses origin at bottom left rather than top left like every other graphics lib
             int Y = 480 - getY(std::stod(line[2]));
-            image.plot_text(fontf, 10, X, Y, 0, tchar, 1.0, 0.0, 0.0);
-            // TODO: BONUS - render a blended circle at (lat, lon) that matches colormap for wind val
-            // TODO: BONUS - render arrow pointing toward wdir
+            int wind_int = std::stoi(line[0]);
+            if (wind_int != 1000){  // -1000 represents invalid response
+                int temp_col = map_value(wind_int, -80, 130);
+                auto r = static_cast<double>(red[temp_col]);
+                auto g = static_cast<double>(green[temp_col]);
+                auto b = static_cast<double>(blue[temp_col]);
+                image.filledcircle_blend(X,Y,30,0.5,r,g,b);
+            }
+            else {
+                image.filledcircle(X,Y,3,255,0,0);
+            }
         }
     }
 
@@ -115,6 +130,23 @@ void draw_wind(const std::vector<std::vector<std::vector<double>>> &shapes,
             image.line(x2,y2, x1,y1,0, 0,0);
         }
     }
+
+    // Render text
+    char *fontf = const_cast<char *>("/mapper/data/fonts/Nexa-Light.ttf");
+    for (const std::vector<std::string> &line: wind) {
+        for (const std::string &val: line) {
+            // Render text of value at (lat, lon)
+            char *tchar = const_cast<char *>(line[0].c_str());  // using const_cast bc plot_text() won't accept const char*
+            int X = getX(std::stod(line[3]));
+            // sub Y value from height(480) bc PNGwriter uses origin at bottom left rather than top left like every other graphics lib
+            int Y = 480 - getY(std::stod(line[2]));
+            if (line[0] != "1000"){
+                image.plot_text(fontf, 10, X, Y, 0, tchar, 0.0, 0.0, 0.0);
+            }
+            // TODO: Render arrow pointing in wdir
+        }
+    }
+
     image.close();
 }
 
