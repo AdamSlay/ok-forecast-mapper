@@ -81,7 +81,7 @@ async def fetch_data(stations: DataFrame, state_abv: str) -> None:
 
     day = datetime.today().strftime('%Y-%m-%d')
     hour = datetime.utcnow().isoformat(timespec='hours')
-    dir_path = f'/src/data-vol/{str(day)}/{str(hour)}'
+    dir_path = f'/vol/data-vol/{str(day)}/{str(hour)}'
     try:
         os.makedirs(dir_path)
     except Exception as e:
@@ -106,7 +106,7 @@ async def fetch_data(stations: DataFrame, state_abv: str) -> None:
 
     # Write data to csv and save to shared vol
     fn = f"{state_abv}-{hour}.csv"
-    with open(rf"/src/data-vol/{day}/{hour}/{fn}", "w", newline="\n") as file:
+    with open(rf"/vol/data-vol/{day}/{hour}/{fn}", "w", newline="\n") as file:
         fields = ['temp(F)', 'windSp(mph)', 'windDir', 'lat', 'lon']
         write = csv.writer(file)
         write.writerow(fields)
