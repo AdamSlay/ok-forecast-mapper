@@ -3,6 +3,7 @@ import csv
 from datetime import datetime
 import os
 import socket
+from zoneinfo import ZoneInfo
 
 import aiohttp
 from colorama import Fore
@@ -78,10 +79,10 @@ async def fetch_data(stations: DataFrame, state_abv: str) -> None:
     :param state_abv: 2-letter abbreviation of the state currently being iterated
     :return: None
     """
-
-    day = datetime.today().strftime('%Y-%m-%d')
-    hour = datetime.utcnow().isoformat(timespec='hours')
-    dir_path = f'/vol/data-vol/{str(day)}/{str(hour)}'
+    tz_pref = ZoneInfo("US/Central")
+    day = datetime.now(tz=tz_pref).strftime('%Y-%m-%d')
+    hour = datetime.now(tz=tz_pref).strftime('%Y-%m-%dT%H')
+    dir_path = f'/vol/data-vol/{str(day)}'
     try:
         os.makedirs(dir_path)
     except Exception as e:
@@ -106,7 +107,7 @@ async def fetch_data(stations: DataFrame, state_abv: str) -> None:
 
     # Write data to csv and save to shared vol
     fn = f"{state_abv}-{hour}.csv"
-    with open(rf"/vol/data-vol/{day}/{hour}/{fn}", "w", newline="\n") as file:
+    with open(rf"/vol/data-vol/{day}/{fn}", "w", newline="\n") as file:
         fields = ['temp(F)', 'windSp(mph)', 'windDir', 'lat', 'lon']
         write = csv.writer(file)
         write.writerow(fields)
@@ -121,11 +122,13 @@ def command_request(host: str, port: int, command: str) -> None:
     :param port: Port number to connect to on 'png-mapper'
     :return: None
     """
-    day = datetime.today().strftime('%Y-%m-%d')
-    hour = datetime.utcnow().isoformat(timespec='hours')
-    path = f'/mapper/vol/{day}/{hour}/OK-{hour}.csv'
+    tz_pref = ZoneInfo("US/Central")
+    day = datetime.now(tz=tz_pref).strftime('%Y-%m-%d')
+    hour = datetime.now(tz=tz_pref).strftime('%Y-%m-%dT%H')
+    path = f'{day}/'
+    file = f'OK-{hour}'
 
-    resp = requests.post(f'http://{host}:{port}/{command}', json={"args": [path]})
+    resp = requests.post(f'http://{host}:{port}/{command}', json={"args": [path, file]})
     print(resp.json())
 
 
