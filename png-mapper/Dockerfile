@@ -10,16 +10,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       build-essential \
       cmake \
       clang \
-      gdb
+      gdb && \
+      mkdir -p /mapper/vol /base/images &&  \
+      useradd -u 8887 png-user &&  \
+      chown png-user /mapper /mapper/vol /base/images /home
+
 RUN git clone -c feature.manyFiles=true https://github.com/spack/spack.git
 COPY png-mapper/etc/config.yaml spack/etc/spack/defaults
 RUN cd spack/bin && ./spack install pngwriter@0.7.0
 
 
 FROM base as builder
-RUN mkdir -p /mapper/vol /base/images /spack &&  \
-    useradd -u 8887 png-user &&  \
-    chown png-user /mapper /mapper/vol /base/images /spack /home
 
 COPY --chown=png-user: png-mapper/ /mapper
 

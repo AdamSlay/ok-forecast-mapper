@@ -1,5 +1,5 @@
 #!/bin/bash
-#tree /spack
+
 cd src/ || exit
 mkdir build images
 cd build/ || exit
