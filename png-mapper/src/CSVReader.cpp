@@ -8,6 +8,10 @@
 
 
 std::vector<std::vector<std::string>> CSVReader::read_csv(const std::string& fn){
+    /**
+     * This is the core CSV reader. It reads the csv as a byte stream and parses each row into a vector of string values
+     * Each row is then stored in an enclosing vector, creating the vector<vector<string>> structure
+     */
     std::ifstream file(fn);
     std::vector<std::vector<std::string>> data;
     std::string line;
@@ -30,6 +34,9 @@ std::vector<std::vector<std::string>> CSVReader::read_csv(const std::string& fn)
 }
 
 std::vector<std::vector<std::string>> CSVReader::get_temp(const std::vector<std::vector<std::string>> &data){
+    /**
+     * Takes the vector<vector<string>> structure produced by read_csv() and returns only the Temperature values
+     */
     std::vector<std::vector<std::string>> temp;
     for (const std::vector<std::string> &line: data) {
         std::vector<std::string> vals;
@@ -42,6 +49,9 @@ std::vector<std::vector<std::string>> CSVReader::get_temp(const std::vector<std:
 }
 
 std::vector<std::vector<std::string>> CSVReader::get_wind(const std::vector<std::vector<std::string>> &data){
+    /**
+     * Takes the vector<vector<string>> structure produced by read_csv() and returns only the WindSpeed values
+     */
     std::vector<std::vector<std::string>> wind;
     for (const std::vector<std::string> &line: data) {
         std::vector<std::string> vals;

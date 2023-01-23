@@ -10,20 +10,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       build-essential \
       cmake \
       clang \
-      gdb && \
-      mkdir -p /mapper/vol /base/images &&  \
-      useradd -u 8887 png-user &&  \
-      chown png-user /mapper /mapper/vol /base/images /home
+      gdb \
+      && mkdir -p /mapper/vol /base/images \
+      && useradd -u 8887 png-user \
+      && chown png-user /mapper /mapper/vol /base/images /home \
+      && git clone -c feature.manyFiles=true https://github.com/spack/spack.git
 
-RUN git clone -c feature.manyFiles=true https://github.com/spack/spack.git
 COPY png-mapper/etc/config.yaml spack/etc/spack/defaults
-RUN cd spack/bin && ./spack install pngwriter@0.7.0
+RUN cd spack/bin \
+    && ./spack install pngwriter@0.7.0
 
 
 FROM base as builder
 
 COPY --chown=png-user: png-mapper/ /mapper
 
-RUN python3 -m venv .venv && . .venv/bin/activate
 RUN python3 -m pip install /mapper/httpexec/ hypercorn
+
 USER png-user

@@ -9,6 +9,9 @@ using std::endl;
 
 
 Shape::Shape(const std::string &fn) {
+    /**
+     * Data structure for rendering .shp files without the other .shp format files(.shx, .dbf)
+     */
     filename = fn;
     input = std::ifstream(filename, std::ios::in|std::ios::binary);
     input.read((char*)&fcode, 4);
@@ -27,7 +30,17 @@ Shape::Shape(const std::string &fn) {
     after_header = 100;  // byte at which the first record starts
 }
 
+Shape::~Shape() {
+    /**
+     * Close the byte stream
+     */
+    input.close();
+}
+
 void Shape::primary_header() const {
+    /**
+     * Prints the primary header for the .shp file
+     */
     cout << "---Primary Header---" << endl;
     cout << "file code: " << fcode << endl;
     cout << "file length: " << flen << endl;
@@ -44,6 +57,9 @@ void Shape::primary_header() const {
 }
 
 void Shape::rec_header() {
+    /**
+     * Record Header. Reads the header info for each record header in the .shp file
+     */
     input.read((char*)&recnum, 4);
     input.read((char*)&reclen, 4);
     input.read((char*)&rectype, 4);
@@ -59,6 +75,10 @@ void Shape::rec_header() {
 }
 
 std::vector<std::vector<std::vector<double>>> Shape::get_shapes() {
+    /**
+     * This is the core SHP reader. It reads the .shp file as a byte stream and parses each shape into a vector of coordinates
+     * Each shape is then stored in an enclosing vector, creating the vector<vector<vector<double>>> structure
+     */
     std::vector<std::vector<std::vector<double>>> shapes;
     input.seekg(after_header,std::ios::beg);
     while (input.tellg() != -1) {
@@ -80,8 +100,4 @@ std::vector<std::vector<std::vector<double>>> Shape::get_shapes() {
         shapes.push_back(shp);
     }
     return shapes;
-}
-
-Shape::~Shape() {
-    input.close();
 }

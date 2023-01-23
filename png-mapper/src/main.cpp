@@ -16,27 +16,41 @@ static const float green[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 static const float blue[] = {0.5f,0.5156862745098039f,0.5313725490196078f,0.5470588235294118f,0.5627450980392157f,0.5784313725490196f,0.5941176470588235f,0.6098039215686275f,0.6254901960784314f,0.6411764705882352f,0.6568627450980392f,0.6725490196078432f,0.6882352941176471f,0.7039215686274509f,0.7196078431372549f,0.7352941176470589f,0.7509803921568627f,0.7666666666666666f,0.7823529411764706f,0.7980392156862746f,0.8137254901960784f,0.8294117647058823f,0.8450980392156863f,0.8607843137254902f,0.8764705882352941f,0.892156862745098f,0.907843137254902f,0.9235294117647059f,0.9392156862745098f,0.9549019607843137f,0.9705882352941176f,0.9862745098039216f,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0.9941176470588236f,0.9784313725490197f,0.9627450980392158f,0.9470588235294117f,0.9313725490196079f,0.915686274509804f,0.8999999999999999f,0.884313725490196f,0.8686274509803922f,0.8529411764705883f,0.8372549019607844f,0.8215686274509804f,0.8058823529411765f,0.7901960784313726f,0.7745098039215685f,0.7588235294117647f,0.7431372549019608f,0.7274509803921569f,0.7117647058823531f,0.696078431372549f,0.6803921568627451f,0.6647058823529413f,0.6490196078431372f,0.6333333333333333f,0.6176470588235294f,0.6019607843137256f,0.5862745098039217f,0.5705882352941176f,0.5549019607843138f,0.5392156862745099f,0.5235294117647058f,0.5078431372549019f,0.4921568627450981f,0.4764705882352942f,0.4607843137254903f,0.4450980392156865f,0.4294117647058826f,0.4137254901960783f,0.3980392156862744f,0.3823529411764706f,0.3666666666666667f,0.3509803921568628f,0.335294117647059f,0.3196078431372551f,0.3039215686274508f,0.2882352941176469f,0.2725490196078431f,0.2568627450980392f,0.2411764705882353f,0.2254901960784315f,0.2098039215686276f,0.1941176470588237f,0.1784313725490199f,0.1627450980392156f,0.1470588235294117f,0.1313725490196078f,0.115686274509804f,0.1000000000000001f,0.08431372549019622f,0.06862745098039236f,0.05294117647058805f,0.03725490196078418f,0.02156862745098032f,0.00588235294117645f,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 int getX(const double &lon){
-    const int width = 23040;  // the conversion equation from lat/lon to x/y is tiny, so this is the ratio scaled up
+    /**
+     * Convert Longitude into X coordinate. The conversion equations I used can be found here:
+     * https://stackoverflow.com/questions/4953150/convert-lat-longs-to-x-y-co-ordinates
+     */
+    const int width = 23040;  // the conversion from lat/lon to x/y is tiny, so this is scaled up by a factor of 32
     const double x = fmod((width*(180 + lon)/360), (width + (width/2)));
     return (int)round(x) - 4850;  // shift transformation to make it fit within the frame
 }
 
 int getY(const double &lat){
-    const double width = 23040;  // the conversion equation from lat/lon to x/y is tiny, so this is the ratio scaled up
-    const double height = 15360;  // the conversion equation from lat/lon to x/y is tiny, so this is the ratio scaled up
-    const double PI = 3.14159265359;
-    const double latRad = lat*PI/180;
-    const double mercN = log(tan((PI/4)+(latRad/2)));
-    const double y = (height/2)-(width*mercN/(2*PI));
+    /**
+     * Convert Latitude into Y coordinate. The conversion equations I used can be found here:
+     * https://stackoverflow.com/questions/4953150/convert-lat-longs-to-x-y-co-ordinates
+     */
+    const double width = 23040;  // the conversion from lat/lon to x/y is tiny, so this is scaled up by a factor of 32
+    const double height = 15360;  // the conversion from lat/lon to x/y is tiny, so this is scaled up by a factor of 32
+    const double PI = 3.14159265359;  // sufficient approximation for this purpose
+    const double latRad = (lat * PI) / 180;
+    const double mercN = log(tan((PI / 4) + (latRad / 2)));
+    const double y = (height / 2) - (width * mercN / (2 * PI));
     return (int)round(y) - 5000;  // shift transformation to make it fit within the frame
 }
 
 int map_value(int value, int min, int max){
+    /**
+     * Find the RGB colormap value for the given Temp/WindSpeed with it's corresponding min/max values
+     */
     value = std::clamp(value, min, max);
     return (value-min) * 255 / (max - min);
 }
 
 void make_dirs(const std::string& path) {
+    /**
+     * Make the required directory paths for temp and wind maps on the host machine
+     */
     std::string tempPath = "/base/images/maps/temp/" + path;
     std::string windPath = "/base/images/maps/wind/" + path;
 
@@ -51,6 +65,9 @@ void draw_temp(const std::vector<std::vector<std::vector<double>>> &shapes,
                const std::vector<std::vector<std::string>> &temp,
                const std::string& path,
                const std::string& file){
+    /**
+     * Draw the temperature map and save it to the host machine as a .png file
+     */
     std::string tempPath = "/base/images/maps/temp/" + path + file + ".png";
     char* p = const_cast<char *>(tempPath.c_str());
     pngwriter image(720,480,1.0,p);
@@ -59,10 +76,9 @@ void draw_temp(const std::vector<std::vector<std::vector<double>>> &shapes,
     for (const std::vector<std::string> &line: temp) {
         for (const std::string &val: line) {
             int X = getX(std::stod(line[2]));
-            int Y = 480 - getY(std::stod(line[1]));
-            // sub Y value from height(480) bc PNGwriter uses origin at bottom left rather than top left like every other graphics lib
+            int Y = 480 - getY(std::stod(line[1]));  // sub Y from 480(frame height) bc PNGwriter uses origin at bottom left rather than top left
             int temp_int = std::stoi(line[0]);
-            if (temp_int != 1000){  // -1000 represents invalid response
+            if (temp_int != 1000){  // 1000 represents invalid response
                 int temp_col = map_value(temp_int, -30, 130);
                 auto r = static_cast<double>(red[temp_col]);
                 auto g = static_cast<double>(green[temp_col]);
@@ -88,13 +104,11 @@ void draw_temp(const std::vector<std::vector<std::vector<double>>> &shapes,
     // Render text values
     for (const std::vector<std::string> &line: temp) {
         for (const std::string &val: line) {
-            // using const_cast because plot_text() won't accept const char*
-            char *fontf = const_cast<char *>("/mapper/data/fonts/Nexa-Light.ttf");
+            char *fontf = const_cast<char *>("/mapper/data/fonts/Nexa-Light.ttf");  // using const_cast because plot_text() won't accept const char*
             int X = getX(std::stod(line[2]));
-            // sub Y value from height(480) bc PNGwriter uses origin at bottom left rather than top left like every other graphics lib
-            int Y = 480 - getY(std::stod(line[1]));
+            int Y = 480 - getY(std::stod(line[1]));  // sub Y from 480(frame height) bc PNGwriter uses origin at bottom left rather than top left
             char *tchar = const_cast<char *>(line[0].c_str());
-            if (line[0] != "1000"){
+            if (line[0] != "1000"){  // 1000 represents invalid response
                 image.plot_text(fontf, 10, X, Y, 0, tchar, 0.0, 0.0, 0.0);
             }
             else {
@@ -109,6 +123,9 @@ void draw_wind(const std::vector<std::vector<std::vector<double>>> &shapes,
                const std::vector<std::vector<std::string>> &wind,
                const std::string& path,
                const std::string& file){
+    /**
+     * Draw the wind speed map and save it to the host machine as a .png file
+     */
     std::string tempPath = "/base/images/maps/wind/" + path + file + ".png";
     char* p = const_cast<char *>(tempPath.c_str());
     pngwriter image(720,480,1.0,p);
@@ -116,13 +133,10 @@ void draw_wind(const std::vector<std::vector<std::vector<double>>> &shapes,
     // Render data - render data first so shp outline goes over it
     for (const std::vector<std::string> &line: wind) {
         for (const std::string &val: line) {
-            // Render text of value at (lat, lon)
-            char *tchar = const_cast<char *>(line[0].c_str());  // using const_cast bc plot_text() won't accept const char*
             int X = getX(std::stod(line[3]));
-            // sub Y value from height(480) bc PNGwriter uses origin at bottom left rather than top left like every other graphics lib
-            int Y = 480 - getY(std::stod(line[2]));
+            int Y = 480 - getY(std::stod(line[2]));  // sub Y from 480(frame height) bc PNGwriter uses origin at bottom left rather than top left
             int wind_int = std::stoi(line[0]);
-            if (wind_int != 1000){  // -1000 represents invalid response
+            if (wind_int != 1000){  // 1000 represents invalid response
                 int temp_col = map_value(wind_int, -80, 130);
                 auto r = static_cast<double>(red[temp_col]);
                 auto g = static_cast<double>(green[temp_col]);
@@ -149,12 +163,10 @@ void draw_wind(const std::vector<std::vector<std::vector<double>>> &shapes,
     char *fontf = const_cast<char *>("/mapper/data/fonts/Nexa-Light.ttf");
     for (const std::vector<std::string> &line: wind) {
         for (const std::string &val: line) {
-            // Render text of value at (lat, lon)
             char *tchar = const_cast<char *>(line[0].c_str());  // using const_cast bc plot_text() won't accept const char*
             int X = getX(std::stod(line[3]));
-            // sub Y value from height(480) bc PNGwriter uses origin at bottom left rather than top left like every other graphics lib
-            int Y = 480 - getY(std::stod(line[2]));
-            if (line[0] != "1000"){
+            int Y = 480 - getY(std::stod(line[2]));  // sub Y from 480(frame height) bc PNGwriter uses origin at bottom left rather than top left
+            if (line[0] != "1000"){  // 1000 represents invalid response
                 image.plot_text(fontf, 10, X, Y, 0, tchar, 0.0, 0.0, 0.0);
             }
             else {
