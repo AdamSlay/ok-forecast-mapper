@@ -35,5 +35,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && chmod +x /mapper/src/build/png_mapper_exe \
     && python3 -m pip install /mapper/httpexec/ hypercorn
 
+WORKDIR /mapper
 USER png-user
 
