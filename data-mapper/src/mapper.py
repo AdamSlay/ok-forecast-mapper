@@ -135,6 +135,10 @@ def command_request(host: str, port: int, command: str) -> None:
 if __name__ == "__main__":
     try:
         asyncio.run(main())
+    except Exception as ex:
+        print(f"There was an exception while executing main() in mapper.py: {ex}")
+
+    try:
         command_request('png-mapper', 8000, 'png_mapper_exe')
     except Exception as ex:
-        print(f"There was an exception in mapper.py: {ex}")
+        print(f"There was an exception while executing command_request() in mapper.py: {ex}")
