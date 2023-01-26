@@ -8,10 +8,9 @@ from zoneinfo import ZoneInfo
 import aiohttp
 from colorama import Fore
 from meteostat import Stations
-from pandas import DataFrame
 import requests
 
-from api import Forecast
+from src.api import Forecast
 
 oklahoma = [["Oklahoma", "OK", "40"]]
 # State, Abbreviation, FP code
@@ -32,12 +31,11 @@ us_states = [
 ]
 
 
-async def main() -> int:
-    await asyncio.gather(*map(loop, oklahoma))
-    return 0
+async def loop() -> None:
+    await asyncio.gather(*map(get_stations, oklahoma))
 
 
-async def loop(state: list) -> None:
+async def get_stations(state: list) -> None:
     """
     Async loop that controls program runtime
     :param state: List that includes ["State Name", "State Abbreviation", "State FP Code"]
@@ -51,7 +49,7 @@ async def loop(state: list) -> None:
     await task
 
 
-def create_df(state_abv: str) -> DataFrame:
+def create_df(state_abv: str) -> Stations:
     """
     Use the Stations class from meteostat to fetch station data for every available station within the given state
     If station data is currently unavailable, prune from DataFrame
@@ -70,7 +68,7 @@ def create_df(state_abv: str) -> DataFrame:
         print(Fore.RED + f"Error in create_df while working on {state_abv}: {e}")
 
 
-async def fetch_data(stations: DataFrame, state_abv: str) -> None:
+async def fetch_data(stations: Stations, state_abv: str) -> None:
     """
     Iterate through the stations within each state and fetch the forecast data from
     api.weather.gov. After fetching the data, create a .csv file and save that file to the
@@ -132,13 +130,22 @@ def command_request(host: str, port: int, command: str) -> None:
     print(resp.json())
 
 
-if __name__ == "__main__":
+def main() -> int:
     try:
-        asyncio.run(main())
-    except Exception as ex:
-        print(f"There was an exception while executing main() in mapper.py: {ex}")
+        asyncio.run(loop())
+    except Exception as e:
+        print(f"There was an exception while executing loop() in mapper.py: {e}")
 
     try:
         command_request('png-mapper', 8000, 'png_mapper_exe')
+    except Exception as e:
+        print(f"There was an exception while executing command_request() in mapper.py: {e}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        main()
     except Exception as ex:
-        print(f"There was an exception while executing command_request() in mapper.py: {ex}")
+        print(f"There was an exception while executing main() in mapper.py: {ex}")

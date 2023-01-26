@@ -9,7 +9,7 @@ services:
       - type: volume
         source: data-share
         target: /vol/data-vol
-    command: ["python3", "/src/mapper.py"]
+    command: ["mapper.py"]
 
   png-mapper:
     build:

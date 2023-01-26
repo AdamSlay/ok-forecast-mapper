@@ -1,6 +1,5 @@
-import asyncio
-
 import aiohttp
+
 from colorama import Fore
 
 
@@ -65,4 +64,4 @@ class Forecast:
 
         except Exception as e:
             print(Fore.RED + f"Error in get_forecast() while requesting {self.lat}, {self.lon}: {e}", flush=True)
-            raise Exception
+            stat_data.append([1000, 1000, 1000, self.lat, self.lon])
