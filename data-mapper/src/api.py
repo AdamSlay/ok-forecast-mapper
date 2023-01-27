@@ -1,12 +1,8 @@
 import aiohttp
 import logging
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p',
-                    encoding='utf-8',
-                    filename='/log/mapper.log',
-                    level=logging.INFO)
-logger = logging.getLogger(f'data-mapper: {__name__}')
+
+api_log = logging.getLogger(f'data-mapper: {__name__}')
 
 
 class Forecast:
@@ -33,11 +29,11 @@ class Forecast:
             if 'properties' in forecast_url:
                 return forecast_url['properties']['forecastHourly']  # return the forecastHourly link
             else:
-                logger.warning(f"get_json() returned None: {forecast_url}")
+                api_log.warning(f"get_json() returned None: {forecast_url}")
                 return ""
 
         except Exception as e:
-            logger.warning(f"Error in get_json() while requesting {url}: {e}")
+            api_log.warning(f"Error in get_json() while requesting {url}: {e}")
             return ""
 
     async def get_forecast(self, forecast_url: str, stat_data: list) -> list:
@@ -62,10 +58,10 @@ class Forecast:
                 return stat_data
 
             elif 'properties' not in forecast_json:
-                logger.warning(f"Incorrect JSON while requesting {forecast_url}: {forecast_json}")
+                api_log.warning(f"Incorrect JSON while requesting {forecast_url}: {forecast_json}")
                 stat_data.append([1000, 1000, 1000, self.lat, self.lon])
                 return stat_data
 
         except Exception as e:
-            logger.warning(f"Error in get_forecast() while requesting {self.lat}, {self.lon}: {e}")
+            api_log.warning(f"Error in get_forecast() while requesting {self.lat}, {self.lon}: {e}")
             stat_data.append([1000, 1000, 1000, self.lat, self.lon])

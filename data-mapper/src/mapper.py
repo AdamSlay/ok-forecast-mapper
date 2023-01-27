@@ -12,42 +12,40 @@ import requests
 
 from src.api import Forecast
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p',
-                    encoding='utf-8',
-                    filename='/log/mapper.log',
-                    level=logging.INFO)
-logger = logging.getLogger(f'data-mapper: {__name__}')
-
-# State, Abbreviation, FP code
-oklahoma = [["Oklahoma", "OK", "40"]]
+# Initialize logger so it can be recognized globally
+mapper_log = logging.getLogger(f'data-mapper: {__name__}')
 
 
 def main() -> int:
-    logger.info("Started")
+    os.makedirs("/log/logs", exist_ok=True)
+    log_date = datetime.now(tz=ZoneInfo('US/Central')).strftime('%Y-%m-%d')
+    log_time = datetime.now(tz=ZoneInfo('US/Central')).strftime('%Y-%m-%d %I:%M:%S %p')
+    logging.basicConfig(format=f'{log_time} - %(name)s - %(levelname)s - %(message)s',
+                        encoding='utf-8',
+                        filename=f'/log/logs/{log_date}.log',
+                        level=logging.INFO)
+    mapper_log.info("-----| Data-Mapper Started  |-----")
 
     try:
-        asyncio.run(loop())
+        oklahoma = ["Oklahoma", "OK", "40"]  # [State, Abbreviation, FP code]
+        asyncio.run(get_stations(oklahoma))
     except Exception as e:
-        logger.warning(f"There was an exception while executing loop() in mapper.py: {e}")
+        mapper_log.fatal(f"There was an exception while executing loop() in mapper.py: {e}")
+        raise Exception
 
     try:
         command_request('png-mapper', 8000, 'png_mapper_exe')
     except Exception as e:
-        logger.warning(f"There was an exception while executing command_request() in mapper.py: {e}")
+        mapper_log.fatal(f"There was an exception while executing command_request() in mapper.py: {e}")
+        raise Exception
 
-    logger.info("Finished")
-
+    mapper_log.info("-----| Data-Mapper Finished |-----")
     return 0
-
-
-async def loop() -> None:
-    await asyncio.gather(*map(get_stations, oklahoma))
 
 
 async def get_stations(state: list) -> None:
     """
-    Async loop that controls program runtime
+    Get station data and create async task
     :param state: List that includes ["State Name", "State Abbreviation", "State FP Code"]
     :return: None
     """
@@ -73,7 +71,7 @@ def create_df(state_abv: str) -> Stations:
         stations = stations[~stations.icao.isin(exclude)]  # exclude invalid stations
         return stations
     except Exception as e:
-        logger.warning(f"Error in create_df() while working on {state_abv}: {e}")
+        mapper_log.warning(f"Error in create_df() while working on {state_abv}: {e}")
 
 
 async def fetch_data(stations: Stations, state_abv: str) -> None:
@@ -89,10 +87,7 @@ async def fetch_data(stations: Stations, state_abv: str) -> None:
     day = datetime.now(tz=tz_pref).strftime('%Y-%m-%d')
     hour = datetime.now(tz=tz_pref).strftime('%Y-%m-%dT%H')
     dir_path = f'/vol/data-vol/{str(day)}'
-    try:
-        os.makedirs(dir_path)
-    except Exception as e:
-        logger.warning(f"Could not create {dir_path}: {e}")
+    os.makedirs(dir_path, exist_ok=True)
 
     # fetch data from weather.gov api and put in Queue
     stat_data = []
@@ -118,6 +113,7 @@ async def fetch_data(stations: Stations, state_abv: str) -> None:
         write = csv.writer(file)
         write.writerow(fields)
         write.writerows(stat_data)
+    mapper_log.info(f'Successfully saved forecast data to /vol/data-vol/{day}/{fn}')
 
 
 def command_request(host: str, port: int, command: str) -> None:
@@ -128,7 +124,7 @@ def command_request(host: str, port: int, command: str) -> None:
     :param port: Port number to connect to on 'png-mapper'
     :return: None
     """
-    logger.info(f'Sending request to {host} on port {port}. Command: {command}')
+    mapper_log.info(f'Sending request to {host} on port {port}. Command: {command}')
     tz_pref = ZoneInfo("US/Central")
     day = datetime.now(tz=tz_pref).strftime('%Y-%m-%d')
     hour = datetime.now(tz=tz_pref).strftime('%Y-%m-%dT%H')
@@ -136,7 +132,7 @@ def command_request(host: str, port: int, command: str) -> None:
     file = f'OK-{hour}'
 
     resp = requests.post(f'http://{host}:{port}/{command}', json={"args": [path, file]})
-    logger.info(f'Response from {host}: {resp.json()}')
+    mapper_log.info(f'Response from {host}: {resp.json()}')
 
 
 if __name__ == "__main__":
