@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
 FROM python:3.10
 
 RUN useradd --create-home -u 8887 mapper-user \
-    && mkdir -p /vol/data-vol
+    && mkdir -p /vol/data-vol /log
 
 COPY --from=builder --chown=mapper-user /opt/venv /opt/venv
 

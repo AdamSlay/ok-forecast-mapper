@@ -6,6 +6,9 @@ services:
       dockerfile: data-mapper/Dockerfile
       context: .
     volumes:
+      - type: bind
+        source: ./
+        target: /log
       - type: volume
         source: data-share
         target: /vol/data-vol
@@ -23,7 +26,6 @@ services:
         source: data-share
         target: /mapper/vol
     entrypoint: /bin/sh
-#    command: ["-c", "cd /mapper/ && sh ./build.sh"]
     command: ["-c", "export HTTPEXEC_EXEC_ROOT='/mapper/src/build/' && python3 -m hypercorn --error-logfile - --access-logfile - --bind png-mapper:8000 httpexec.asgi:app
 "]
     stdin_open: true

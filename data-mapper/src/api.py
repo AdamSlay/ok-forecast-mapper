@@ -1,12 +1,19 @@
 import aiohttp
+import logging
 
-from colorama import Fore
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    encoding='utf-8',
+                    filename='/log/mapper.log',
+                    level=logging.INFO)
+logger = logging.getLogger(f'data-mapper: {__name__}')
 
 
 class Forecast:
     """
     Class that fetches data from api.weather.gov
     """
+
     def __init__(self, loc: list, session: aiohttp.ClientSession):
         self.lat = loc[0]  # latitude
         self.lon = loc[1]  # longitude
@@ -19,7 +26,6 @@ class Forecast:
         :return: Forecast URL string for current lat,lon. This is the url for the most recent hourly forecast.
         """
         url = f"https://api.weather.gov/points/{self.lat},{self.lon}"
-        print(Fore.WHITE + f'getting json - {url}', flush=True)
         try:
             get_req = await self.session.get(url, timeout=1)
             forecast_url = await get_req.json(content_type=None)
@@ -27,12 +33,11 @@ class Forecast:
             if 'properties' in forecast_url:
                 return forecast_url['properties']['forecastHourly']  # return the forecastHourly link
             else:
-                print(Fore.CYAN + f"get_json returned None: {forecast_url}")
+                logger.warning(f"get_json() returned None: {forecast_url}")
                 return ""
-            # await asyncio.sleep(10)
 
         except Exception as e:
-            print(Fore.RED + f"Error in get_json() while requesting {url}: {e}", flush=True)
+            logger.warning(f"Error in get_json() while requesting {url}: {e}")
             return ""
 
     async def get_forecast(self, forecast_url: str, stat_data: list) -> list:
@@ -42,7 +47,6 @@ class Forecast:
         :param stat_data: List of values derived from hourly forecast [temp, wspd, wdir]
         :return: Stat_data with values inserted
         """
-        print(Fore.WHITE + f'getting forecast for {self.lat}, {self.lon} - {forecast_url}', flush=True)
         try:
             get_req = await self.session.get(forecast_url)
             forecast_json = await get_req.json(content_type=None)
@@ -58,10 +62,10 @@ class Forecast:
                 return stat_data
 
             elif 'properties' not in forecast_json:
-                print(Fore.MAGENTA + f"Incorrect JSON while requesting {forecast_url}: {forecast_json}", flush=True)
+                logger.warning(f"Incorrect JSON while requesting {forecast_url}: {forecast_json}")
                 stat_data.append([1000, 1000, 1000, self.lat, self.lon])
                 return stat_data
 
         except Exception as e:
-            print(Fore.RED + f"Error in get_forecast() while requesting {self.lat}, {self.lon}: {e}", flush=True)
+            logger.warning(f"Error in get_forecast() while requesting {self.lat}, {self.lon}: {e}")
             stat_data.append([1000, 1000, 1000, self.lat, self.lon])
