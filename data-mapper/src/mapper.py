@@ -19,8 +19,8 @@ mapper_log = logging.getLogger(f'data-mapper: {__name__}')
 def main() -> int:
     os.makedirs("/log/logs", exist_ok=True)
     log_date = datetime.now(tz=ZoneInfo('US/Central')).strftime('%Y-%m-%d')
-    log_time = datetime.now(tz=ZoneInfo('US/Central')).strftime('%Y-%m-%d %I:%M:%S %p')
-    logging.basicConfig(format=f'{log_time} - %(name)s - %(levelname)s - %(message)s',
+    log_time = datetime.now(tz=ZoneInfo('US/Central')).strftime('%Y-%m-%d %I:%M:%S')
+    logging.basicConfig(format=f'[{log_time}]  [%(name)s]  [%(levelname)s]  %(message)s',
                         encoding='utf-8',
                         filename=f'/log/logs/{log_date}.log',
                         level=logging.INFO)
