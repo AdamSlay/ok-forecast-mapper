@@ -74,26 +74,23 @@ void Shape::rec_header() {
     }
 }
 
-std::vector<std::vector<std::vector<double>>> Shape::get_shapes() {
+std::vector<std::vector<Coordinate>> Shape::get_shapes() {
     /**
-     * This is the core SHP reader. It reads the .shp file as a byte stream and parses each shape into a vector of coordinates
-     * Each shape is then stored in an enclosing vector, creating the vector<vector<vector<double>>> structure
-     */
-    std::vector<std::vector<std::vector<double>>> shapes;
+    * This is the core SHP reader. It reads the .shp file as a byte stream and parses each shape into a vector of coordinates
+    * Each shape is then stored in an enclosing vector, creating the vector<vector<Coordinate>> structure
+    */
+    std::vector<std::vector<Coordinate>> shapes;
     input.seekg(after_header,std::ios::beg);
     while (input.tellg() != -1) {
         rec_header();
         if (input.tellg() == -1){
             break;
         }
-        std::vector<std::vector<double>> shp;
+        std::vector<Coordinate> shp;
         while(numpoints){
-            std::vector<double> pair;
-            for (int i = 0; i < 2; i++) {
-                double point;
-                input.read((char*)&point, 8);
-                pair.push_back(point);
-            }
+            Coordinate pair;
+            input.read((char*)&pair.latitude, 8);
+            input.read((char*)&pair.longitude, 8);
             shp.push_back(pair);
             numpoints--;
         }

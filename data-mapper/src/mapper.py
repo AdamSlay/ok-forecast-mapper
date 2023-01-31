@@ -20,7 +20,7 @@ def main() -> int:
     os.makedirs("/log/logs", exist_ok=True)
     log_date = datetime.now(tz=ZoneInfo('US/Central')).strftime('%Y-%m-%d')
     log_time = datetime.now(tz=ZoneInfo('US/Central')).strftime('%Y-%m-%d %I:%M:%S')
-    logging.basicConfig(format=f'[{log_time}]  [%(name)s]  [%(levelname)s]  %(message)s',
+    logging.basicConfig(format=f'[{log_time}]  [%(name)s]  [%(levelname).1s]  %(message)s',
                         encoding='utf-8',
                         filename=f'/log/logs/{log_date}.log',
                         level=logging.INFO)
@@ -129,7 +129,7 @@ def command_request(host: str, port: int, command: str) -> None:
     day = datetime.now(tz=tz_pref).strftime('%Y-%m-%d')
     hour = datetime.now(tz=tz_pref).strftime('%Y-%m-%dT%H')
     path = f'{day}/'
-    file = f'OK-{hour}'
+    file = f'{hour}'
 
     resp = requests.post(f'http://{host}:{port}/{command}', json={"args": [path, file]})
     mapper_log.info(f'Response from {host}: {resp.json()}')

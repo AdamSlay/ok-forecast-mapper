@@ -6,6 +6,10 @@
 #ifndef SHP_PARSER_SHAPE_H
 #define SHP_PARSER_SHAPE_H
 
+struct Coordinate {
+    double latitude;
+    double longitude;
+};
 
 class Shape {
 private:
@@ -41,7 +45,7 @@ public:
     ~Shape();
     void primary_header() const;
     void rec_header();
-    std::vector<std::vector<std::vector<double>>> get_shapes();
+    std::vector<std::vector<Coordinate>> get_shapes();
 };
 
 #endif //SHP_PARSER_SHAPE_H
