@@ -3,6 +3,7 @@ import csv
 from datetime import datetime
 import logging
 import os
+from pandas import DataFrame
 import socket
 from zoneinfo import ZoneInfo
 
@@ -15,8 +16,16 @@ from src.api import Forecast
 # Initialize logger so it can be recognized globally
 mapper_log = logging.getLogger(f'data-mapper: {__name__}')
 
+# Create global day/hour vars
+tz_pref = ZoneInfo("US/Central")
+day = datetime.now(tz=tz_pref).strftime('%Y-%m-%d')
+hour = datetime.now(tz=tz_pref).strftime('%Y-%m-%dT%H')
 
-def main() -> int:
+
+def init_logging() -> None:
+    """
+    Initialize logger and create /logs on host if not already created
+    """
     os.makedirs("/log/logs", exist_ok=True)
     log_date = datetime.now(tz=ZoneInfo('US/Central')).strftime('%Y-%m-%d')
     log_time = datetime.now(tz=ZoneInfo('US/Central')).strftime('%Y-%m-%d %I:%M:%S')
@@ -24,72 +33,40 @@ def main() -> int:
                         encoding='utf-8',
                         filename=f'/log/logs/{log_date}.log',
                         level=logging.INFO)
-    mapper_log.info("-----| Data-Mapper Started  |-----")
-
-    try:
-        oklahoma = ["Oklahoma", "OK", "40"]  # [State, Abbreviation, FP code]
-        asyncio.run(get_stations(oklahoma))
-    except Exception as e:
-        mapper_log.fatal(f"There was an exception while executing loop() in mapper.py: {e}")
-        raise Exception
-
-    try:
-        command_request('png-mapper', 8000, 'png_mapper_exe')
-    except Exception as e:
-        mapper_log.fatal(f"There was an exception while executing command_request() in mapper.py: {e}")
-        raise Exception
-
-    mapper_log.info("-----| Data-Mapper Finished |-----")
-    return 0
 
 
-async def get_stations(state: list) -> None:
+def make_shared_dirs() -> None:
+    """
+    Create shared data volume on docker network that links to png-mapper container
+    """
+    dir_path = f'/vol/data-vol/{str(day)}'
+    os.makedirs(dir_path, exist_ok=True)
+
+
+async def get_stations(state: str) -> None:
     """
     Get station data and create async task
-    :param state: List that includes ["State Name", "State Abbreviation", "State FP Code"]
+    :param state: state abbreviation - "OK"
     :return: None
     """
-    state_abv = state[1]
-    stations = create_df(state_abv)
+    stations = Stations()
+    stations = stations.region('US', state)
+    stations = stations.fetch()
+    exclude = ['N/A']
+    stations = stations[~stations.icao.isin(exclude)]  # exclude invalid stations
 
-    task = asyncio.create_task(fetch_data(stations, state_abv))
+    task = asyncio.create_task(fetch_data(stations))
     await task
 
 
-def create_df(state_abv: str) -> Stations:
-    """
-    Use the Stations class from meteostat to fetch station data for every available station within the given state
-    If station data is currently unavailable, prune from DataFrame
-    :param state_abv: 2-letter abbreviation of the given state
-    :return: Pandas DataFrame containing station data from each station in the state
-    """
-    try:
-        stations = Stations()
-        stations = stations.region('US', state_abv)
-        stations = stations.fetch()
-        exclude = ['N/A']
-        stations = stations[~stations.icao.isin(exclude)]  # exclude invalid stations
-        return stations
-    except Exception as e:
-        mapper_log.warning(f"Error in create_df() while working on {state_abv}: {e}")
-
-
-async def fetch_data(stations: Stations, state_abv: str) -> None:
+async def fetch_data(stations: DataFrame) -> None:
     """
     Iterate through the stations within each state and fetch the forecast data from
     api.weather.gov. After fetching the data, create a .csv file and save that file to the
     shared volume
     :param stations: Pandas DataFrame of the station data for each station in the given state
-    :param state_abv: 2-letter abbreviation of the state currently being iterated
     :return: None
     """
-    tz_pref = ZoneInfo("US/Central")
-    day = datetime.now(tz=tz_pref).strftime('%Y-%m-%d')
-    hour = datetime.now(tz=tz_pref).strftime('%Y-%m-%dT%H')
-    dir_path = f'/vol/data-vol/{str(day)}'
-    os.makedirs(dir_path, exist_ok=True)
-
-    # fetch data from weather.gov api and put in Queue
     stat_data = []
     conn = aiohttp.TCPConnector(family=socket.AF_INET, ssl=False, )
     coords = stations[["latitude", "longitude"]]
@@ -106,8 +83,15 @@ async def fetch_data(stations: Stations, state_abv: str) -> None:
             else:
                 stat_data.append([1000, 1000, 1000, loc["latitude"], loc["longitude"]])
 
-    # Write data to csv and save to shared vol
-    fn = f"{state_abv}-{hour}.csv"
+    write_csv(stat_data)
+
+
+def write_csv(stat_data: list) -> None:
+    """
+    Write data to csv and save to shared vol
+    :param stat_data: List of station data to be saved as .csv file
+    """
+    fn = f"{hour}.csv"
     with open(rf"/vol/data-vol/{day}/{fn}", "w", newline="\n") as file:
         fields = ['temp(F)', 'windSp(mph)', 'windDir', 'lat', 'lon']
         write = csv.writer(file)
@@ -125,14 +109,36 @@ def command_request(host: str, port: int, command: str) -> None:
     :return: None
     """
     mapper_log.info(f'Sending request to {host} on port {port}. Command: {command}')
-    tz_pref = ZoneInfo("US/Central")
-    day = datetime.now(tz=tz_pref).strftime('%Y-%m-%d')
-    hour = datetime.now(tz=tz_pref).strftime('%Y-%m-%dT%H')
     path = f'{day}/'
     file = f'{hour}'
 
     resp = requests.post(f'http://{host}:{port}/{command}', json={"args": [path, file]})
     mapper_log.info(f'Response from {host}: {resp.json()}')
+
+
+def main() -> int:
+    try:
+        init_logging()
+        mapper_log.info("-----| Data-Mapper Started  |-----")
+    except Exception as e:
+        mapper_log.fatal(f'There was an exception while initializing logging in mapper.py: {e}')
+        return 1
+
+    try:
+        make_shared_dirs()
+        asyncio.run(get_stations("OK"))
+    except Exception as e:
+        mapper_log.fatal(f"There was an exception while executing loop() in mapper.py: {e}")
+        return 2
+
+    try:
+        command_request('png-mapper', 8000, 'png_mapper_exe')
+    except Exception as e:
+        mapper_log.fatal(f"There was an exception while executing command_request() in mapper.py: {e}")
+        return 3
+
+    mapper_log.info("-----| Data-Mapper Finished |-----")
+    return 0
 
 
 if __name__ == "__main__":

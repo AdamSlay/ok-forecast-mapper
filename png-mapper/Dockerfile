@@ -8,7 +8,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       cmake \
       clang \
       gdb \
-      tree \
       python3 \
       && mkdir -p /mapper/vol /base/images /spack \
       && git clone -c feature.manyFiles=true https://github.com/spack/spack.git

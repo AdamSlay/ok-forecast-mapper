@@ -33,7 +33,7 @@ int getX(const double &lon){
      * https://stackoverflow.com/questions/4953150/convert-lat-longs-to-x-y-co-ordinates
      */
     const int width = 23040;  // the conversion from lat/lon to x/y is tiny, so this is scaled up by a factor of 32
-    const double x = fmod((width*(180 + lon)/360), (width + (width/2)));
+    double x = fmod((width*(180 + lon)/360), (width + (width/2)));
     return (int)round(x) - 4850;  // shift transformation to make it fit within the frame
 }
 
@@ -45,9 +45,9 @@ int getY(const double &lat){
     const double width = 23040;  // the conversion from lat/lon to x/y is tiny, so this is scaled up by a factor of 32
     const double height = 15360;  // the conversion from lat/lon to x/y is tiny, so this is scaled up by a factor of 32
     const double PI = 3.14159265359;  // sufficient approximation for this purpose
-    const double latRad = (lat * PI) / 180;
-    const double mercN = log(tan((PI / 4) + (latRad / 2)));
-    const double y = (height / 2) - (width * mercN / (2 * PI));
+    double latRad = (lat * PI) / 180;
+    double mercN = log(tan((PI / 4) + (latRad / 2)));
+    double y = (height / 2) - (width * mercN / (2 * PI));
     return (int)round(y) - 5000;  // shift transformation to make it fit within the frame
 }
 
@@ -80,28 +80,29 @@ void render_data(const std::vector<std::vector<std::string>> &csv ,pngwriter &im
      * image: pngwriter image object
      * isTemp: is it the temp csv? else, its the wind csv
      */
+    int color_map_min;
+    int circle_radius = 30;
+    double circle_opacity = 0.5;
     for (const std::vector<std::string> &line: csv) {
-        int color_min;
-        int X;
-        int Y;
+        int X, Y;
         if (isTemp) {
             X = getX(std::stod(line[2]));
             Y = 480 - getY(std::stod(line[1]));  // sub Y from 480(frame height) bc PNGwriter uses origin at bottom left rather than top left
-            color_min = -30;
+            color_map_min = -30;
         }
         else {
             X = getX(std::stod(line[3]));
             Y = 480 - getY(std::stod(line[2]));
-            color_min = -80;
+            color_map_min = -80;
         }
 
         int data_point = std::stoi(line[0]);
         if (data_point != 1000){  // 1000 represents invalid response
-            int color = map_value(data_point, color_min, 130);
+            int color = map_value(data_point, color_map_min, 130);
             auto r = static_cast<double>(red[color]);
             auto g = static_cast<double>(green[color]);
             auto b = static_cast<double>(blue[color]);
-            image.filledcircle_blend(X,Y,30,0.5,r,g,b);
+            image.filledcircle_blend(X,Y,circle_radius,circle_opacity,r,g,b);
         }
     }
 }
@@ -136,6 +137,10 @@ void render_text(const std::vector<std::vector<std::string>> &csv, pngwriter &im
      */
     int X, Y;
     char *fontf = const_cast<char *>("/mapper/data/fonts/Nexa-Light.ttf");  // using const_cast because plot_text() won't accept const char*
+    int font_size = 10;
+    double font_angle = 0;
+    int circle_radius = 3;
+
     for (const std::vector<std::string> &line: csv) {
         if (isTemp) {
             X = getX(std::stod(line[2]));
@@ -147,10 +152,10 @@ void render_text(const std::vector<std::vector<std::string>> &csv, pngwriter &im
         }
         char *data_point = const_cast<char *>(line[0].c_str());
         if (line[0] != "1000"){  // 1000 represents invalid response
-            image.plot_text(fontf, 10, X, Y, 0, data_point, 0.0, 0.0, 0.0);
+            image.plot_text(fontf, font_size, X, Y, font_angle, data_point, 0.0, 0.0, 0.0);
         }
         else {
-            image.filledcircle(X,Y,3,1.0,0.0,0.0);
+            image.filledcircle(X,Y,circle_radius,1.0,0.0,0.0);
         }
     }
 }
@@ -208,7 +213,7 @@ int main(int argc, char* argv[]) {
         std::string file = argv[2];
         std::string log_fn = file.substr(0,10);
         init_logger(log_fn);
-        spdlog::info("Starting png-writer");
+        spdlog::info("-----| png-writer started |-----");
 
         // read csv from shared vol & make dirs on host
         std::string csv_full_path = "/mapper/vol/" + path + file + ".csv";
@@ -234,6 +239,6 @@ int main(int argc, char* argv[]) {
         spdlog::critical(e.what());
         return 1;
     }
-    spdlog::info("png-writer finished successfully");
+    spdlog::info("-----| png-writer finished |-----");
     return 0;
 }

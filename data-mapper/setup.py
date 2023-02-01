@@ -6,7 +6,7 @@ setup(name="mapper",
       author="Adam Slay",
       author_email="aslay@ou.edu",
       packages=find_packages("."),
-      install_requires=["aiohttp", "asyncio", "meteostat", "requests"],
+      install_requires=["aiohttp", "asyncio", "pandas", "meteostat", "requests"],
       entry_points={
           "console_scripts": [
               "mapper.py = src.mapper:main"
