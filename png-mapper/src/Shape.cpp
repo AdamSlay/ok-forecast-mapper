@@ -1,7 +1,3 @@
-
-#include <bit>
-#include <iostream>
-
 #include "Shape.h"
 
 using std::cout;

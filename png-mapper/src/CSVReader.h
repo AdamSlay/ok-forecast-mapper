@@ -1,10 +1,12 @@
-
+#include <fstream>
+#include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
-
 
 #ifndef PNG_MAPPER_EXE_CSVREADER_H
 #define PNG_MAPPER_EXE_CSVREADER_H
+
 
 class CSVReader {
 public:

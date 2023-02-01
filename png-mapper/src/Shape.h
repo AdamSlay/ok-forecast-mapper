@@ -1,10 +1,12 @@
-
+#include <bit>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
 #ifndef SHP_PARSER_SHAPE_H
 #define SHP_PARSER_SHAPE_H
+
 
 struct Coordinate {
     double latitude;

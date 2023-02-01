@@ -41,52 +41,6 @@ void make_dirs(const std::string& path) {
     std::filesystem::create_directories(fs_wind);
 }
 
-void draw_temp(const std::vector<std::vector<Coordinate>> &shapes,
-               const std::vector<std::vector<std::string>> &temp,
-               const std::string& path,
-               const std::string& file){
-    /**
-     * Draw the temperature map and save it to the host machine as a .png file
-     * shapes: struct from Shape object
-     * temp: temp csv file
-     * path: path to endpoint on host machine
-     * file: filename at end of path
-     */
-    spdlog::info("Starting draw_temp()");
-    std::string tempPath = "/base/images/maps/temp/" + path + file + ".png";
-    char* p = const_cast<char *>(tempPath.c_str());
-    pngwriter image(720,480,1.0,p);
-
-    render_data(temp, image, true);
-    render_shapes(shapes, image);
-    render_text(temp,image,true);
-
-    image.close();
-}
-
-void draw_wind(const std::vector<std::vector<Coordinate>> &shapes,
-               const std::vector<std::vector<std::string>> &wind,
-               const std::string& path,
-               const std::string& file){
-    /**
-     * Draw the wind map and save it to the host machine as a .png file
-     * shapes: struct from Shape object
-     * wind: wind csv file
-     * path: path to endpoint on host machine
-     * file: filename at end of path
-     */
-    spdlog::info("Starting draw_wind()");
-    std::string tempPath = "/base/images/maps/wind/" + path + file + ".png";
-    char* p = const_cast<char *>(tempPath.c_str());
-    pngwriter image(720,480,1.0,p);
-
-    render_data(wind, image, false);
-    render_shapes(shapes, image);
-    render_text(wind,image,false);
-
-    image.close();
-}
-
 int getX(const double &lon){
     /**
      * Convert Longitude into X coordinate. The conversion equations I used can be found here:
@@ -204,6 +158,52 @@ void render_text(const std::vector<std::vector<std::string>> &csv, pngwriter &im
             image.filledcircle(X,Y,circle_radius,1.0,0.0,0.0);
         }
     }
+}
+
+void draw_temp(const std::vector<std::vector<Coordinate>> &shapes,
+               const std::vector<std::vector<std::string>> &temp,
+               const std::string& path,
+               const std::string& file){
+    /**
+     * Draw the temperature map and save it to the host machine as a .png file
+     * shapes: struct from Shape object
+     * temp: temp csv file
+     * path: path to endpoint on host machine
+     * file: filename at end of path
+     */
+    spdlog::info("Starting draw_temp()");
+    std::string tempPath = "/base/images/maps/temp/" + path + file + ".png";
+    char* p = const_cast<char *>(tempPath.c_str());
+    pngwriter image(720,480,1.0,p);
+
+    render_data(temp, image, true);
+    render_shapes(shapes, image);
+    render_text(temp,image,true);
+
+    image.close();
+}
+
+void draw_wind(const std::vector<std::vector<Coordinate>> &shapes,
+               const std::vector<std::vector<std::string>> &wind,
+               const std::string& path,
+               const std::string& file){
+    /**
+     * Draw the wind map and save it to the host machine as a .png file
+     * shapes: struct from Shape object
+     * wind: wind csv file
+     * path: path to endpoint on host machine
+     * file: filename at end of path
+     */
+    spdlog::info("Starting draw_wind()");
+    std::string tempPath = "/base/images/maps/wind/" + path + file + ".png";
+    char* p = const_cast<char *>(tempPath.c_str());
+    pngwriter image(720,480,1.0,p);
+
+    render_data(wind, image, false);
+    render_shapes(shapes, image);
+    render_text(wind,image,false);
+
+    image.close();
 }
 
 int main(int argc, char* argv[]) {
