@@ -15,8 +15,8 @@ struct Coordinate {
 
 class Shape {
 private:
-        std::string filename;
-        std::ifstream input;
+        std::string filename {};
+        std::ifstream input {};
         // ---Primary Header---
         unsigned int fcode{};  // 0-3
         unsigned int flen{};  // 24-27
@@ -30,7 +30,7 @@ private:
         double maxz{};  // 68-83
         double minm{};  // 84-99
         double maxm{};  // 84-99
-        unsigned int after_header;
+        unsigned int after_header {};
         // ---Record Header---
         unsigned int recnum{};
         unsigned int reclen{};

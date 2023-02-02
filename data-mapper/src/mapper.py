@@ -52,8 +52,6 @@ async def get_stations(state: str) -> None:
     stations = Stations()
     stations = stations.region('US', state)
     stations = stations.fetch()
-    exclude = ['N/A']
-    stations = stations[~stations.icao.isin(exclude)]  # exclude invalid stations
 
     task = asyncio.create_task(fetch_data(stations))
     await task
