@@ -1,7 +1,6 @@
 import aiohttp
 import logging
 
-
 api_log = logging.getLogger(f'data-mapper: {__name__}')
 
 
@@ -58,10 +57,10 @@ class Forecast:
                 return stat_data
 
             elif 'properties' not in forecast_json:
-                api_log.warning(f"Incorrect JSON while requesting {forecast_url}: {forecast_json}")
-                stat_data.append([1000, 1000, 1000, self.lat, self.lon])
+                api_log.warning(f"Unexpected JSON while requesting {forecast_url}: {forecast_json}")
+                stat_data.append([1000, 1000, 1000, self.lat, self.lon])  # 1000 = invalid data
                 return stat_data
 
         except Exception as e:
             api_log.warning(f"Error in get_forecast() while requesting {self.lat}, {self.lon}: {e}")
-            stat_data.append([1000, 1000, 1000, self.lat, self.lon])
+            stat_data.append([1000, 1000, 1000, self.lat, self.lon])  # 1000 = invalid data

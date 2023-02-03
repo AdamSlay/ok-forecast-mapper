@@ -66,7 +66,7 @@ async def fetch_data(stations: DataFrame) -> None:
     :return: None
     """
     stat_data = []
-    conn = aiohttp.TCPConnector(family=socket.AF_INET, ssl=False, )
+    conn = aiohttp.TCPConnector(family=socket.AF_INET, ssl=False)
     coords = stations[["latitude", "longitude"]]
     async with aiohttp.ClientSession(connector=conn, trust_env=True) as session:
 
@@ -79,18 +79,19 @@ async def fetch_data(stations: DataFrame) -> None:
                 await api_req.get_forecast(forecast_url, stat_data)
                 # forecast_args order: temp, windSp, windDir, lat, lon
             else:
-                stat_data.append([1000, 1000, 1000, loc["latitude"], loc["longitude"]])
+                stat_data.append([1000, 1000, 1000, loc["latitude"], loc["longitude"]])  # 1000 = invalid data
 
-    write_csv(stat_data)
+    fn = f"/vol/data-vol/{day}/{hour}.csv"
+    write_csv(stat_data, fn)
 
 
-def write_csv(stat_data: list) -> None:
+def write_csv(stat_data: list, fn: str) -> None:
     """
     Write data to csv and save to shared vol
     :param stat_data: List of station data to be saved as .csv file
+    :param fn: Filename to be saved as
     """
-    fn = f"{hour}.csv"
-    with open(rf"/vol/data-vol/{day}/{fn}", "w", newline="\n") as file:
+    with open(rf"{fn}", "w", newline="\n") as file:
         fields = ['temp(F)', 'windSp(mph)', 'windDir', 'lat', 'lon']
         write = csv.writer(file)
         write.writerow(fields)

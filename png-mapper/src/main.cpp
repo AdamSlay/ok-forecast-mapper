@@ -47,8 +47,10 @@ int getX(const double lon){
      * https://stackoverflow.com/questions/4953150/convert-lat-longs-to-x-y-co-ordinates
      */
     const int width {23040};  // the conversion from lat/lon to x/y is tiny, so this is scaled up by a factor of 32
-    const double x { fmod((width*(180 + lon)/360), (width + (width/2))) };
-    return (int)round(x) - 4850;  // shift transformation to make it fit within the frame
+    const double fm_x { (width * (180 + lon)) / 360 };
+    const double fm_y { width + (width/2) };
+    const double x { fmod(fm_x, fm_y) };
+    return round(x) - 4850;  // shift transformation to make it fit within the frame
 }
 
 int getY(const double lat){
@@ -78,28 +80,32 @@ void render_data(const auto& csv , pngwriter& image, const bool isTemp) {
     /**
      * Render a blended circle at (X,Y) position of each data_point. The color of the circle corresponds to it's colormap value
      * csv: the csv datafile used to make this plot(either temp data or wind data)
-     * image: pngwriter image object
+     * image: PNGwriter image object
      * isTemp: is it the temp csv? else, its the wind csv
      */
     int color_map_min {};
+    int color_map_max {};
     int circle_radius {30};
     double circle_opacity {0.5};
+
     for (const auto& line: csv) {
         int X{},Y{};
         if (isTemp) {
             X = getX(std::stod(line[2]));
             Y = 480 - getY(std::stod(line[1]));  // sub Y from 480(frame height) bc PNGwriter uses origin at bottom left rather than top left
             color_map_min = -30;
+            color_map_max = 130;
         }
         else {
             X = getX(std::stod(line[3]));
             Y = 480 - getY(std::stod(line[2]));
-            color_map_min = -80;
+            color_map_min = -30;
+            color_map_max = 80;
         }
 
         int data_point {std::stoi(line[0])};
         if (data_point != 1000){  // 1000 represents invalid response
-            int color {map_value(data_point, color_map_min, 130)};
+            int color {map_value(data_point, color_map_min, color_map_max)};
             auto r {static_cast<double>(red[color])};
             auto g {static_cast<double>(green[color])};
             auto b {static_cast<double>(blue[color])};
@@ -113,13 +119,13 @@ void render_shapes(const auto& shapes, pngwriter& image) {
      * Render Shape outline via iterating through each shape in shapes and drawing a line from previous point to next point
      * Uses getX() and getY() to convert (lat,lon) coordinate into (X,Y) coordinate that fits into image frame size
      * shapes: struct from Shapes object
-     * image: pngwriter image object
+     * image: PNGwriter image object
      */
     for (auto shape: shapes){
         int x1{},y1{},x2{},y2{};
         for (int i = 0; i < shape.size() - 1; ++i){
-            const Coordinate &pair1 {shape.at(i)};
-            const Coordinate &pair2 {shape.at(i+1)};
+            const Coordinate& pair1 {shape.at(i)};
+            const Coordinate& pair2 {shape.at(i+1)};
             x1 = getX(pair1.latitude);
             y1 = 480 - getY(pair1.longitude);
             x2 = getX(pair2.latitude);
@@ -129,18 +135,18 @@ void render_shapes(const auto& shapes, pngwriter& image) {
     }
 }
 
-void render_text(const auto &csv, pngwriter &image, const bool isTemp) {
+void render_text(const auto& csv, pngwriter& image, const bool isTemp) {
     /**
      * Render text value of the data_point at the corresponding (X,Y) coordinate
      * csv: the csv datafile used to make this plot(either temp data or wind data)
-     * image: pngwriter image object
-     * isTemp: is it the temp csv? else, it's the wind csv
+     * image: PNGwriter image object
+     * isTemp: is it the temp csv? else, it's the wind csv-
      */
     int X{},Y{};
     char* fontf {const_cast<char*>("/mapper/data/fonts/Nexa-Light.ttf")};  // using const_cast because plot_text() won't accept const char*
-    int font_size {10};  // pngwriter doesn't support const args
-    double font_angle {0};  // pngwriter doesn't support const args
-    int circle_radius {3};  // pngwriter doesn't support const args
+    int circle_radius {3};  // PNGwriter doesn't support const args
+    int font_size {10};  // PNGwriter doesn't support const args
+    double font_angle {0};  // PNGwriter doesn't support const args
 
     for (const auto& line: csv) {
         if (isTemp) {
@@ -151,7 +157,7 @@ void render_text(const auto &csv, pngwriter &image, const bool isTemp) {
             X = getX(std::stod(line[3]));
             Y = 480 - getY(std::stod(line[2]));
         }
-        char *data_point = const_cast<char *>(line[0].c_str());
+        char* data_point = const_cast<char *>(line[0].c_str());
         if (line[0] != "1000"){  // 1000 represents invalid response
             image.plot_text(fontf, font_size, X, Y, font_angle, data_point, 0.0, 0.0, 0.0);
         }
@@ -226,7 +232,7 @@ int main(int argc, char* argv[]) {
         draw_temp(shps, temp, path, file);
         draw_wind(shps, wind, path, file);
     }
-    catch (std::exception &e) {
+    catch (std::exception& e) {
         spdlog::critical("There was an Error in png-writer: ");
         spdlog::critical(e.what());
         return 1;

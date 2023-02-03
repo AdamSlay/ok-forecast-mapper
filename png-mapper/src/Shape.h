@@ -9,14 +9,14 @@
 
 
 struct Coordinate {
-    double latitude;
-    double longitude;
+    double latitude{};
+    double longitude{};
 };
 
 class Shape {
 private:
-        std::string filename {};
-        std::ifstream input {};
+        std::string filename{};
+        std::ifstream input{};
         // ---Primary Header---
         unsigned int fcode{};  // 0-3
         unsigned int flen{};  // 24-27
@@ -30,7 +30,7 @@ private:
         double maxz{};  // 68-83
         double minm{};  // 84-99
         double maxm{};  // 84-99
-        unsigned int after_header {};
+        unsigned int after_header{};
         // ---Record Header---
         unsigned int recnum{};
         unsigned int reclen{};
@@ -43,7 +43,7 @@ private:
         unsigned int numpoints{};
         unsigned int part{};
 public:
-    explicit Shape(const std::string &fn);
+    explicit Shape(const std::string fn);
     ~Shape();
     void primary_header() const;
     void rec_header();

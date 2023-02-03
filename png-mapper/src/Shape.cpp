@@ -4,7 +4,7 @@ using std::cout;
 using std::endl;
 
 
-Shape::Shape(const std::string &fn) {
+Shape::Shape(const std::string fn) {
     /**
      * Data structure for rendering .shp files without the other .shp format files(.shx, .dbf)
      */
