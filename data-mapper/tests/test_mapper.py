@@ -1,5 +1,4 @@
 import csv
-import socket
 from datetime import datetime
 import logging
 import os
@@ -23,7 +22,7 @@ class MockedStations(DataFrame):
         return self
 
     def fetch(self):
-        return [{'icao': 'OK123'}, {'icao': 'N/A'}]
+        return DataFrame({'icao': ['OK123', 'OK456'], 'latitude': [30.0, 31.0], 'longitude': [97.0, 98.0]})
 
 
 class MockedForecast:
@@ -66,29 +65,26 @@ async def test_get_stations(mocker):
     state = 'OK'
     m_Stations = mocker.patch('src.mapper.Stations', return_value=MockedStations())
     m_fetch_data = mocker.patch('src.mapper.fetch_data')
+    m_write_csv = mocker.patch('src.mapper.write_csv')
 
     await get_stations(state)
 
     m_Stations.assert_called_once_with()
-    stations = m_Stations().fetch()
-    m_fetch_data.assert_called_once_with(stations)
+    m_fetch_data.assert_called()
 
 
 @pytest.mark.asyncio
 async def test_fetch_data(mocker):
-    stations = DataFrame(
-        [{'icao': 'OK123', 'latitude': '30', 'longitude': '97'}, {'icao': 'N/A', 'latitude': '30', 'longitude': '98'}]
-    )
-    conn = aiohttp.TCPConnector(family=socket.AF_INET, ssl=False)
+    m_stations = DataFrame({'icao': ['OK123'], 'latitude': ['30'], 'longitude': ['97']})
+    m_series = m_stations.iloc[0]
     test_stat_data = [[1, 2, 'mph', 4.0, 5.0], [6, 7, 'mph', 9.0, 10.0]]  # Mock data from MockedForecast.get_forecast()
 
     m_session = mocker.patch('aiohttp.ClientSession')
     m_Forecast = mocker.patch('src.api.Forecast', return_value=MockedForecast([30.0, 97.0], aiohttp.ClientSession()))
     m_write_csv = mocker.patch('src.mapper.write_csv')
 
-    await fetch_data(stations)
+    await fetch_data(m_series, m_session, [])
 
-    assert m_session.called_once_with(connector=conn, trust_env=True)
     assert m_Forecast.called_once_with([30.0, 97.0], m_session)
     assert m_Forecast.get_json.called_once()
     assert m_Forecast.get_forecast.called_once_with("test.forecast.url", [])

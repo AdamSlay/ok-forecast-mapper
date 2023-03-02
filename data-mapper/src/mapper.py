@@ -3,8 +3,7 @@ import csv
 from datetime import datetime
 import logging
 import os
-from pandas import DataFrame
-import socket
+from pandas import Series
 from zoneinfo import ZoneInfo
 
 import aiohttp
@@ -53,36 +52,36 @@ async def get_stations(state: str) -> None:
     stations = stations.region('US', state)
     stations = stations.fetch()
 
-    task = asyncio.create_task(fetch_data(stations))
-    await task
-
-
-async def fetch_data(stations: DataFrame) -> None:
-    """
-    Iterate through the stations within each state and fetch the forecast data from
-    api.weather.gov. After fetching the data, create a .csv file and save that file to the
-    shared volume
-    :param stations: Pandas DataFrame of the station data for each station in the given state
-    :return: None
-    """
+    # task = asyncio.create_task(fetch_data(stations))
+    # await task
     stat_data = []
-    conn = aiohttp.TCPConnector(family=socket.AF_INET, ssl=False)
-    coords = stations[["latitude", "longitude"]]
-    async with aiohttp.ClientSession(connector=conn, trust_env=True) as session:
-
-        for row, st_id in enumerate(stations["icao"]):
-            loc = coords.iloc[row]
-            api_req = Forecast(loc, session)
-            forecast_url = await api_req.get_json()
-
-            if forecast_url:
-                await api_req.get_forecast(forecast_url, stat_data)
-                # forecast_args order: temp, windSp, windDir, lat, lon
-            else:
-                stat_data.append([1000, 1000, 1000, loc["latitude"], loc["longitude"]])  # 1000 = invalid data
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for i, station in stations.iterrows():
+            tasks.append(fetch_data(station, session, stat_data))
+        data = await asyncio.gather(*tasks)
 
     fn = f"/vol/data-vol/{day}/{hour}.csv"
     write_csv(stat_data, fn)
+
+
+async def fetch_data(station: Series, session: aiohttp.ClientSession, stat_data: list) -> list:
+    """
+    Fetch the forecast data from api.weather.gov and append to stat_data
+    :param station: Pandas DataFrame Series containing station data for the given station
+    :param session: aiohttp ClientSession
+    :param stat_data: List of station data for all stations
+    :return: stat_data: List of station data
+    """
+    loc = station[["latitude", "longitude"]]
+    api_req = Forecast(loc, session)
+    forecast_url = await api_req.get_json()
+    if forecast_url:
+        await api_req.get_forecast(forecast_url, stat_data)
+        # forecast_args order: temp, windSp, windDir, lat, lon
+    else:
+        stat_data.append([1000, 1000, 1000, loc["latitude"], loc["longitude"]])
+    return stat_data
 
 
 def write_csv(stat_data: list, fn: str) -> None:
@@ -127,7 +126,7 @@ def main() -> int:
         make_shared_dirs()
         asyncio.run(get_stations("OK"))
     except Exception as e:
-        mapper_log.fatal(f"There was an exception while executing loop() in mapper.py: {e}")
+        mapper_log.fatal(f"There was an exception while executing get_stations() in mapper.py: {e}")
         return 2
 
     try:
