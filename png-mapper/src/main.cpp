@@ -48,7 +48,7 @@ int getX(const double lon){
      */
     const int width {23040};  // the conversion from lat/lon to x/y is tiny, so this is scaled up by a factor of 32
     const double fm_x { (width * (180 + lon)) / 360 };
-    const double fm_y { width + (width/2) };
+    const double fm_y { width + (width / 2) };
     const double x { fmod(fm_x, fm_y) };
     return round(x) - 4850;  // shift transformation to make it fit within the frame
 }

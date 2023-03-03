@@ -5,6 +5,7 @@ services:
     build:
       dockerfile: data-mapper/Dockerfile
       context: .
+    profiles: ["prod"]
     volumes:
       - type: bind
         source: ./
@@ -18,6 +19,7 @@ services:
     build:
       dockerfile: png-mapper/Dockerfile
       context: .
+    profiles: ["prod"]
     volumes:
       - type: bind
         source: ./
@@ -26,9 +28,26 @@ services:
         source: data-share
         target: /mapper/vol
     entrypoint: /bin/sh
-    command: ["-c", "export HTTPEXEC_EXEC_ROOT='/mapper/src/build/' && python3 -m hypercorn --error-logfile - --access-logfile - --bind png-mapper:8000 httpexec.asgi:app
-"]
+    command: ["-c", "export HTTPEXEC_EXEC_ROOT='/mapper/src/build/' && python3 -m hypercorn --error-logfile - --access-logfile - --bind png-mapper:8000 httpexec.asgi:app"]
     stdin_open: true
     tty: true
+
+  png-mapper-test:
+    build:
+      dockerfile: png-mapper/Dockerfile
+      target: test
+      context: .
+    profiles: ["test"]
+    entrypoint: /bin/sh
+    command: ["-c", "cd /mapper && ./test.sh"]
+
+  data-mapper-test:
+    build:
+      dockerfile: data-mapper/Dockerfile
+      target: test
+      context: .
+    profiles: ["test"]
+    command: ["pytest"]
+
 volumes:
     data-share:

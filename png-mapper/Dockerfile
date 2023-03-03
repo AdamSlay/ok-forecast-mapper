@@ -21,6 +21,18 @@ RUN cd /mapper \
     && sh ./build.sh
 
 
+# Change this to from builder as test then perfrom useradd and chmod +x test.sh and chown -R png-user /mapper
+FROM builder as test
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN useradd -u 8887 png-user \
+    && chown -R png-user /mapper \
+    && chmod +x /mapper/test.sh
+
+WORKDIR /mapper
+USER png-user
+
+
 FROM ubuntu:jammy
 ARG DEBIAN_FRONTEND=noninteractive
 
