@@ -29,11 +29,9 @@ class Forecast:
                 return forecast_url['properties']['forecastHourly']  # return the forecastHourly link
             else:
                 api_log.warning(f"get_json() returned None: {forecast_url}")
-                return ""
 
         except Exception as e:
             api_log.warning(f"Error in get_json() while requesting {url}: {e}")
-            return ""
 
     async def get_forecast(self, forecast_url: str, stat_data: list) -> list:
         """
