@@ -12,7 +12,15 @@ list(APPEND CMAKE_PREFIX_PATH
 include_directories("/mapper/spdlog/include")
 find_package(PNGwriter REQUIRED)
 
-add_executable(png_mapper_exe src/main.cpp src/Shape.cpp src/Shape.h src/CSVReader.cpp src/CSVReader.h)
+add_executable(
+        png_mapper_exe
+        src/main.cpp
+        src/Shape.cpp
+        src/Shape.h
+        src/CSVReader.cpp
+        src/CSVReader.h
+        src/utils.cpp
+        src/utils.h)
 
 if(PNGwriter_FOUND)
     target_link_libraries(png_mapper_exe PRIVATE PNGwriter::PNGwriter)

@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 project(my_project)
 
-# GoogleTest requires at least C++14
 set(CMAKE_CXX_STANDARD 20)
 
 set(spdlog_DIR /mapper/spdlog/cmake)
@@ -21,12 +20,14 @@ FetchContent_Declare(
         URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
 )
 FetchContent_MakeAvailable(googletest)
+
 enable_testing()
-#add_executable(
-#        unit_tests
-#        main_test.cc
-#)
-add_executable(unit_tests main_test.cc)
+
+add_executable(
+        unit_tests
+        main_test.cc
+)
+
 target_link_libraries(
         unit_tests
         GTest::gtest_main
@@ -34,7 +35,3 @@ target_link_libraries(
 )
 include(GoogleTest)
 gtest_discover_tests(unit_tests)
-
-#if(PNGwriter_FOUND)
-#    target_link_libraries(unit_tests PRIVATE PNGwriter::PNGwriter)
-#endif(PNGwriter_FOUND)
