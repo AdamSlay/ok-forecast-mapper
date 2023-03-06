@@ -26,6 +26,8 @@ enable_testing()
 add_executable(
         unit_tests
         main_test.cc
+        ../src/utils.h
+        ../src/utils.cpp
 )
 
 target_link_libraries(
