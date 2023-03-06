@@ -110,7 +110,7 @@ void draw_temp(const std::vector<std::vector<Coordinate>>& shapes, const std::ve
      * file: filename at end of path
      */
     spdlog::info("Starting draw_temp()");
-    std::string tempPath = "/base/images/maps/temp/" + path + file + ".png";
+    std::string tempPath = "/base/images/maps/tair/" + path + file + ".png";
     char* p = const_cast<char *>(tempPath.c_str());
     pngwriter image(720,480,1.0,p);
 
@@ -130,7 +130,7 @@ void draw_wind(const std::vector<std::vector<Coordinate>>& shapes, const std::ve
      * file: filename at end of path
      */
     spdlog::info("Starting draw_wind()");
-    std::string tempPath {"/base/images/maps/wind/" + path + file + ".png"};
+    std::string tempPath {"/base/images/maps/wspd/" + path + file + ".png"};
     char* p = const_cast<char *>(tempPath.c_str());
     pngwriter image(720,480,1.0,p);
 

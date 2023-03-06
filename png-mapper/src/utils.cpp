@@ -23,8 +23,8 @@ void make_dirs(const std::string path) {
     /**
      * Make the required directory paths for temp and wind maps on the host machine
      */
-    std::string tempPath {"/base/images/maps/temp/" + path};
-    std::string windPath {"/base/images/maps/wind/" + path};
+    std::string tempPath {"/base/images/maps/tair/" + path};
+    std::string windPath {"/base/images/maps/wspd/" + path};
 
     std::filesystem::path fs_temp {tempPath};
     std::filesystem::path fs_wind {windPath};
