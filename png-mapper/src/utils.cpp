@@ -11,7 +11,7 @@
 void init_logger(const std::string log_fn) {
     /**
      * Initialize logger and set logging pattern
-     * log_fn: the filename for the current day's logfile
+     * @log_fn: the filename for the current day's logfile
      */
     std::string full_path {"/base/images/logs/" + log_fn + ".log"};
     auto logger = spdlog::basic_logger_mt("png-mapper: src.main", full_path);

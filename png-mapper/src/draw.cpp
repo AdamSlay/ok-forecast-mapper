@@ -13,9 +13,9 @@
 void render_data(const std::vector<std::vector<std::string>>& csv, pngwriter& image, const bool isTemp) {
     /**
      * Render a blended circle at (X,Y) position of each data_point. The color of the circle corresponds to it's colormap value
-     * csv: the csv datafile used to make this plot(either temp data or wind data)
-     * image: PNGwriter image object
-     * isTemp: is it the temp csv? else, its the wind csv
+     * @csv: the csv datafile used to make this plot(either temp data or wind data)
+     * @image: PNGwriter image object
+     * @isTemp: is it the temp csv? else, its the wind csv
      */
     int color_map_min {};
     int color_map_max {};
@@ -52,8 +52,8 @@ void render_shapes(const std::vector<std::vector<Coordinate>>& shapes, pngwriter
     /**
      * Render Shape outline via iterating through each shape in shapes and drawing a line from previous point to next point
      * Uses getX() and getY() to convert (lat,lon) coordinate into (X,Y) coordinate that fits into image frame size
-     * shapes: struct from Shapes object
-     * image: PNGwriter image object
+     * @shapes: struct from Shapes object
+     * @image: PNGwriter image object
      */
     for (auto shape: shapes){
         int x1{},y1{},x2{},y2{};
@@ -72,9 +72,9 @@ void render_shapes(const std::vector<std::vector<Coordinate>>& shapes, pngwriter
 void render_text(const std::vector<std::vector<std::string>>& csv, pngwriter& image, const bool isTemp) {
     /**
      * Render text value of the data_point at the corresponding (X,Y) coordinate
-     * csv: the csv datafile used to make this plot(either temp data or wind data)
-     * image: PNGwriter image object
-     * isTemp: is it the temp csv? else, it's the wind csv-
+     * @csv: the csv datafile used to make this plot(either temp data or wind data)
+     * @image: PNGwriter image object
+     * @isTemp: is it the temp csv? else, it's the wind csv-
      */
     int X{},Y{};
     char* fontf {const_cast<char*>("/mapper/data/fonts/Nexa-Light.ttf")};  // using const_cast because plot_text() won't accept const char*
@@ -104,10 +104,10 @@ void render_text(const std::vector<std::vector<std::string>>& csv, pngwriter& im
 void draw_temp(const std::vector<std::vector<Coordinate>>& shapes, const std::vector<std::vector<std::string>>& temp, const std::string path, const std::string file){
     /**
      * Draw the temperature map and save it to the host machine as a .png file
-     * shapes: struct from Shape object
-     * temp: temp csv file
-     * path: path to endpoint on host machine
-     * file: filename at end of path
+     * @shapes: struct from Shape object
+     * @temp: temp csv file
+     * @path: path to endpoint on host machine
+     * @file: filename at end of path
      */
     spdlog::info("Starting draw_temp()");
     std::string tempPath = "/base/images/maps/tair/" + path + file + ".png";
@@ -124,10 +124,10 @@ void draw_temp(const std::vector<std::vector<Coordinate>>& shapes, const std::ve
 void draw_wind(const std::vector<std::vector<Coordinate>>& shapes, const std::vector<std::vector<std::string>>& wind, const std::string path, const std::string file){
     /**
      * Draw the wind map and save it to the host machine as a .png file
-     * shapes: struct from Shape object
-     * wind: wind csv file
-     * path: path to endpoint on host machine
-     * file: filename at end of path
+     * @shapes: struct from Shape object
+     * @wind: wind csv file
+     * @path: path to endpoint on host machine
+     * @file: filename at end of path
      */
     spdlog::info("Starting draw_wind()");
     std::string tempPath {"/base/images/maps/wspd/" + path + file + ".png"};
