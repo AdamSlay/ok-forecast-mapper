@@ -5,10 +5,10 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(spdlog_DIR /mapper/spdlog/cmake)
 list(APPEND CMAKE_PREFIX_PATH
-        "/spack/opt/spack/linux-ubuntu22.04-aarch64/gcc-11.3.0/pngwriter" ;
-        "/spack/opt/spack/linux-ubuntu22.04-aarch64/gcc-11.3.0/zlib" ;
-        "/spack/opt/spack/linux-ubuntu22.04-aarch64/gcc-11.3.0/libpng" ;
-        "/spack/opt/spack/linux-ubuntu22.04-aarch64/gcc-11.3.0/freetype" ;
+        "/spack/opt/spack/pngwriter" ;
+        "/spack/opt/spack/zlib" ;
+        "/spack/opt/spack/libpng" ;
+        "/spack/opt/spack/freetype" ;
         )
 include_directories("/mapper/spdlog/include")
 find_package(PNG REQUIRED)

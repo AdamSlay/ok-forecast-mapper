@@ -36,7 +36,7 @@ USER png-user
 FROM ubuntu:jammy
 ARG DEBIAN_FRONTEND=noninteractive
 
-COPY --from=builder /spack/opt/spack/linux-ubuntu22.04-aarch64/gcc-11.3.0 /spack/opt/spack/linux-ubuntu22.04-aarch64/gcc-11.3.0
+COPY --from=builder /spack/opt/spack /spack/opt/spack
 COPY --from=builder --chown=png-user /mapper /mapper
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
