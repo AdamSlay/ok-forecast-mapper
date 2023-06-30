@@ -5,6 +5,9 @@ services:
     build:
       dockerfile: data-mapper/Dockerfile
       context: .
+      args:
+        UID: ${UID}
+        GID: ${GID}
     profiles: ["prod"]
     volumes:
       - type: bind
@@ -19,6 +22,9 @@ services:
     build:
       dockerfile: png-mapper/Dockerfile
       context: .
+      args:
+        UID: ${UID}
+        GID: ${GID}
     profiles: ["prod"]
     volumes:
       - type: bind
@@ -37,6 +43,9 @@ services:
       dockerfile: png-mapper/Dockerfile
       target: test
       context: .
+      args:
+        UID: ${UID}
+        GID: ${GID}
     profiles: ["test"]
     entrypoint: /bin/sh
     command: ["-c", "cd /mapper && ./test.sh"]
@@ -46,8 +55,12 @@ services:
       dockerfile: data-mapper/Dockerfile
       target: test
       context: .
+      args:
+        UID: ${UID}
+        GID: ${GID}
     profiles: ["test"]
     command: ["pytest"]
 
 volumes:
     data-share:
+
