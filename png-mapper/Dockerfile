@@ -2,6 +2,7 @@ FROM ubuntu:jammy as builder
 ARG DEBIAN_FRONTEND=noninteractive
 ARG UID
 ARG GID
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
       git \
       apt-transport-https \
@@ -11,9 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       clang \
       gdb \
       python3 \
-      && groupadd -g ${GID} png-group && useradd -u ${UID} -g png-group png-user \
       && mkdir -p /mapper/vol /base/images /spack \
       && git clone -c feature.manyFiles=true https://github.com/spack/spack.git
+
+RUN groupadd -g ${GID} png-group && useradd -m -u ${UID} -g png-group png-user
 
 COPY png-mapper/etc/config.yaml /spack/etc/spack/defaults
 RUN cd /spack/bin \
@@ -21,13 +23,16 @@ RUN cd /spack/bin \
 
 COPY png-mapper/ /mapper
 RUN cd /mapper \
-    && chown -R png-user:png-group /mapper \
     && sh ./build.sh
+
 
 FROM builder as test
 ARG DEBIAN_FRONTEND=noninteractive
+ARG UID
+ARG GID
 
-RUN chown -R png-user /mapper \
+RUN groupadd -g ${GID} png-group && useradd -m -u ${UID} -g png-group png-user \
+    && chown -R png-user:png-group /mapper \
     && chmod +x /mapper/test.sh
 
 WORKDIR /mapper
@@ -38,10 +43,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG UID
 ARG GID
 
-RUN groupadd -g ${GID} png-group && useradd -u ${UID} -g png-group png-user
+RUN groupadd -g ${GID} png-group && useradd -m -u ${UID} -g png-group png-user
 
 COPY --from=builder /spack/opt/spack /spack/opt/spack
-COPY --from=builder --chown=png-user /mapper /mapper
+COPY --from=builder --chown=${UID}:${GID} /mapper /mapper
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
