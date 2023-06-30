@@ -25,7 +25,7 @@ RUN cd /mapper \
 FROM builder as test
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN useradd -u 8887 png-user \
+RUN useradd -u 1000 png-user \
     && chown -R png-user /mapper \
     && chmod +x /mapper/test.sh
 
@@ -36,7 +36,7 @@ USER png-user
 FROM ubuntu:jammy
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN useradd -u 8887 png-user
+RUN useradd -u 1000 png-user
 
 COPY --from=builder /spack/opt/spack /spack/opt/spack
 COPY --from=builder --chown=png-user /mapper /mapper
