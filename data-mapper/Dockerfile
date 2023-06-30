@@ -36,7 +36,8 @@ USER mapper-user
 FROM python:3.10
 
 RUN useradd --create-home -u 8887 mapper-user \
-    && mkdir -p /vol/data-vol /log
+    && mkdir -p /vol/data-vol /log \
+    && chown -R mapper-user:mapper-user /vol /log
 
 COPY --from=builder --chown=mapper-user /opt/venv /opt/venv
 
