@@ -1,7 +1,5 @@
 FROM ubuntu:jammy as builder
 ARG DEBIAN_FRONTEND=noninteractive
-ARG UID
-ARG GID
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       git \
@@ -14,8 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       python3 \
       && mkdir -p /mapper/vol /base/images /spack \
       && git clone -c feature.manyFiles=true https://github.com/spack/spack.git
-
-RUN groupadd -g ${GID} png-group && useradd -m -u ${UID} -g png-group png-user
 
 COPY png-mapper/etc/config.yaml /spack/etc/spack/defaults
 RUN cd /spack/bin \
@@ -32,28 +28,4 @@ ARG UID
 ARG GID
 
 RUN groupadd -g ${GID} png-group && useradd -m -u ${UID} -g png-group png-user \
-    && chown -R png-user:png-group /mapper \
-    && chmod +x /mapper/test.sh
-
-WORKDIR /mapper
-USER png-user
-
-FROM ubuntu:jammy
-ARG DEBIAN_FRONTEND=noninteractive
-ARG UID
-ARG GID
-
-RUN groupadd -g ${GID} png-group && useradd -m -u ${UID} -g png-group png-user
-
-COPY --from=builder /spack/opt/spack /spack/opt/spack
-COPY --from=builder --chown=${UID}:${GID} /mapper /mapper
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
-    pip \
-    && mkdir -p /base/images \
-    && chmod +x /mapper/src/build/png_mapper_exe \
-    && python3 -m pip install /mapper/httpexec/ hypercorn
-
-WORKDIR /mapper
-USER png-user
+    && chown -R png-user

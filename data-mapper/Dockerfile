@@ -1,6 +1,4 @@
 FROM python:3.10 AS builder
-ARG UID
-ARG GID
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -9,8 +7,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gfortran \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-RUN groupadd -g ${GID} mapper-group && useradd -m -u ${UID} -g mapper-group mapper-user
 
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
