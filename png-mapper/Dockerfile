@@ -39,8 +39,7 @@ ARG UID
 ARG GID
 
 RUN groupadd -g ${GID} png-group && useradd -m -u ${UID} -g png-group png-user \
-    && mkdir -p /base/images \
-    && chmod +x /mapper/src/build/png_mapper_exe
+    && mkdir -p /base/images
 
 COPY --from=builder /spack/opt/spack /spack/opt/spack
 COPY --from=builder --chown=${UID}:${GID} /mapper /mapper
@@ -48,7 +47,9 @@ COPY --from=builder --chown=${UID}:${GID} /mapper /mapper
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     pip \
-    && python3 -m pip install /mapper/httpexec/ hypercorn
+    && python3 -m pip install /mapper/httpexec/ hypercorn \
+    && chmod +x /mapper/src/build/png_mapper_exe
 
 WORKDIR /mapper
 USER png-user
+
