@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
 
 FROM python:3.10 as test
 
-RUN useradd --create-home -u 8887 mapper-user \
+RUN useradd --create-home -u 1000 mapper-user \
     && mkdir -p /vol/data-vol /log
 
 COPY --from=builder --chown=mapper-user /opt/venv /opt/venv
@@ -35,9 +35,10 @@ USER mapper-user
 
 FROM python:3.10
 
-RUN useradd --create-home -u 8887 mapper-user \
+RUN useradd --create-home -u 1000 mapper-user \
     && mkdir -p /vol/data-vol /log \
-    && chown -R mapper-user:mapper-user /vol /log
+    && chown -R mapper-user:mapper-user /vol \
+    && chmod -R 777 /log
 
 COPY --from=builder --chown=mapper-user /opt/venv /opt/venv
 
