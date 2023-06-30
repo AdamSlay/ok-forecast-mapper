@@ -36,13 +36,14 @@ USER png-user
 FROM ubuntu:jammy
 ARG DEBIAN_FRONTEND=noninteractive
 
+RUN useradd -u 8887 png-user
+
 COPY --from=builder /spack/opt/spack /spack/opt/spack
 COPY --from=builder --chown=png-user /mapper /mapper
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     pip \
-    && useradd -u 8887 png-user \
     && mkdir -p /base/images \
     && chmod +x /mapper/src/build/png_mapper_exe \
     && python3 -m pip install /mapper/httpexec/ hypercorn
