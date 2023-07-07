@@ -23,11 +23,10 @@ RUN cd /mapper \
 
 FROM builder as test
 ARG DEBIAN_FRONTEND=noninteractive
-ARG UID
-ARG GID
+ARG USER_ID
 
-RUN groupadd -g ${GID} png-group && useradd -m -u ${UID} -g png-group png-user \
-    && chown -R png-user:png-group /mapper \
+RUN useradd -m -u ${USER_ID} png-user \
+    && chown -R png-user /mapper \
     && chmod +x /mapper/test.sh
 
 WORKDIR /mapper
@@ -35,14 +34,13 @@ USER png-user
 
 FROM ubuntu:jammy
 ARG DEBIAN_FRONTEND=noninteractive
-ARG UID
-ARG GID
+ARG USER_ID
 
-RUN groupadd -g ${GID} png-group && useradd -m -u ${UID} -g png-group png-user \
+RUN useradd -m -u ${USER_ID} png-user \
     && mkdir -p /base/images
 
 COPY --from=builder /spack/opt/spack /spack/opt/spack
-COPY --from=builder --chown=${UID}:${GID} /mapper /mapper
+COPY --from=builder --chown=${USER_ID} /mapper /mapper
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \

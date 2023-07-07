@@ -17,32 +17,30 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && pip install .
 
 FROM builder as test
-ARG UID
-ARG GID
+ARG USER_ID
 
-RUN groupadd -g ${GID} mapper-group && useradd -m -u ${UID} -g mapper-group mapper-user \
+RUN useradd -m -u ${USER_ID} mapper-user \
     && mkdir -p /vol/data-vol /log
 
-COPY --from=builder --chown=${UID}:${GID} /opt/venv /opt/venv
+COPY --from=builder --chown=${USER_ID} /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 RUN pip install --no-cache-dir pytest
 
-COPY --chown=${UID}:${GID} /data-mapper /home/mapper-user
+COPY --chown=${USER_ID} /data-mapper /home/mapper-user
 
 WORKDIR /home/mapper-user
 USER mapper-user
 
 FROM builder
-ARG UID
-ARG GID
+ARG USER_ID
 
-RUN groupadd -g ${GID} mapper-group && useradd -m -u ${UID} -g mapper-group mapper-user \
+RUN useradd -m -u ${USER_ID} mapper-user \
     && mkdir -p /vol/data-vol /log \
     && chown -R mapper-user:mapper-group /vol \
     && chmod -R 777 /log
 
-COPY --from=builder --chown=${UID}:${GID} /opt/venv /opt/venv
+COPY --from=builder --chown=${USER_ID} /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /home/mapper-user
