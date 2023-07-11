@@ -5,12 +5,12 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(spdlog_DIR /mapper/spdlog/cmake)
 list(APPEND CMAKE_PREFIX_PATH
-        "/spack/opt/spack/pngwriter" ;
-        "/spack/opt/spack/zlib" ;
-        "/spack/opt/spack/libpng" ;
-        "/spack/opt/spack/freetype" ;
+        "/home/png-user/mapper/spack/opt/spack/pngwriter" ;
+        "/home/png-user/mapper/spack/opt/spack/zlib" ;
+        "/home/png-user/mapper/spack/opt/spack/libpng" ;
+        "/home/png-user/mapper/spack/opt/spack/freetype" ;
         )
-include_directories("/mapper/spdlog/include")
+include_directories("/home/png-user/mapper/spdlog/include")
 find_package(PNG REQUIRED)
 find_package(PNGwriter REQUIRED)
 

@@ -13,7 +13,7 @@ void init_logger(const std::string log_fn) {
      * Initialize logger and set logging pattern
      * @log_fn: the filename for the current day's logfile
      */
-    std::string full_path {"/base/images/logs/" + log_fn + ".log"};
+    std::string full_path {"/home/png-user/mapper/base/images/logs/" + log_fn + ".log"};
     auto logger = spdlog::basic_logger_mt("png-mapper: src.main", full_path);
     spdlog::set_default_logger(logger);
     spdlog::set_pattern("[%Y-%m-%d %H:%M:%S]  [%n]  [%L]  %v");
@@ -23,8 +23,8 @@ void make_dirs(const std::string path) {
     /**
      * Make the required directory paths for temp and wind maps on the host machine
      */
-    std::string tempPath {"/base/images/maps/tair/" + path};
-    std::string windPath {"/base/images/maps/wspd/" + path};
+    std::string tempPath {"/home/png-user/mapper/base/images/maps/tair/" + path};
+    std::string windPath {"/home/png-user/mapper/base/images/maps/wspd/" + path};
 
     std::filesystem::path fs_temp {tempPath};
     std::filesystem::path fs_wind {windPath};

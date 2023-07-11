@@ -11,10 +11,10 @@ services:
     volumes:
       - type: bind
         source: ./
-        target: /log
+        target: /home/mapper-user/mapper/log
       - type: volume
         source: data-share
-        target: /vol/data-vol
+        target: /home/mapper-user/mapper/vol/data-vol
     command: ["mapper.py"]
 
   png-mapper:
@@ -27,12 +27,12 @@ services:
     volumes:
       - type: bind
         source: ./
-        target: /base/images
+        target: /home/png-user/mapper/base/images
       - type: volume
         source: data-share
-        target: /mapper/vol
+        target: /home/png-user/mapper/vol
     entrypoint: /bin/sh
-    command: ["-c", "export HTTPEXEC_EXEC_ROOT='/mapper/src/build/' && python3 -m hypercorn --error-logfile - --access-logfile - --bind png-mapper:8000 httpexec.asgi:app"]
+    command: ["-c", "export HTTPEXEC_EXEC_ROOT='/home/png-user/mapper/src/build/' && python3 -m hypercorn --error-logfile - --access-logfile - --bind png-mapper:8000 httpexec.asgi:app"]
     stdin_open: true
     tty: true
 
@@ -45,7 +45,7 @@ services:
         USER_ID: ${USER_ID}
     profiles: ["test"]
     entrypoint: /bin/sh
-    command: ["-c", "cd /mapper && ./test.sh"]
+    command: ["-c", "cd /home/png-user/mapper && ./test.sh"]
 
   data-mapper-test:
     build:

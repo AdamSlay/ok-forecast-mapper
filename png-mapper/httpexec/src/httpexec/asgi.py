@@ -30,7 +30,7 @@ def config():
     """
     # Environment variables take precedence over the config file. Config file
     # keys must be ALL CAPS and at the root level.
-    file = Path(environ.get("HTTPEXEC_CONFIG_PATH",  "/mapper/httpexec/etc/config.toml"))
+    file = Path(environ.get("HTTPEXEC_CONFIG_PATH",  "/home/png-user/mapper/httpexec/etc/config.toml"))
     app.config.from_file(Path.cwd() / file, load)
     app.config.from_prefixed_env("HTTPEXEC")
     return

@@ -1,5 +1,10 @@
 FROM ubuntu:jammy as builder
 ARG DEBIAN_FRONTEND=noninteractive
+ARG USER_ID=502
+ENV MAPPER_PATH_PREFIX /home/png-user/mapper
+ENV COMPOSE png-mapper
+ENV STANDALONE .
+ENV COMPOSE_OR_STANDALONE_HOST_PATH ${COMPOSE}
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       git \
@@ -10,44 +15,48 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       clang \
       gdb \
       python3 \
-      && mkdir -p /mapper/vol /base/images /spack \
+      && useradd -m -u ${USER_ID} png-user \
+      && mkdir -p ${MAPPER_PATH_PREFIX}/vol ${MAPPER_PATH_PREFIX}/base/images ${MAPPER_PATH_PREFIX}/spack \
+      && cd ${MAPPER_PATH_PREFIX} \
       && git clone -c feature.manyFiles=true https://github.com/spack/spack.git
 
-COPY png-mapper/etc/config.yaml /spack/etc/spack/defaults
-RUN cd /spack/bin \
+COPY ${COMPOSE_OR_STANDALONE_HOST_PATH}/etc/config.yaml ${MAPPER_PATH_PREFIX}/spack/etc/spack/defaults
+RUN cd ${MAPPER_PATH_PREFIX}/spack/bin \
     && ./spack install pngwriter@0.7.0
 
-COPY png-mapper/ /mapper
-RUN cd /mapper \
+COPY ${COMPOSE_OR_STANDALONE_HOST_PATH} ${MAPPER_PATH_PREFIX}
+RUN cd ${MAPPER_PATH_PREFIX} \
     && sh ./build.sh
 
 FROM builder as test
 ARG DEBIAN_FRONTEND=noninteractive
-ARG USER_ID
+ARG USER_ID=502
+ENV MAPPER_PATH_PREFIX /home/png-user/mapper
 
-RUN useradd -m -u ${USER_ID} png-user \
-    && chown -R png-user /mapper \
-    && chmod +x /mapper/test.sh
+RUN chown -R png-user ${MAPPER_PATH_PREFIX} \
+    && chmod +x ${MAPPER_PATH_PREFIX}/test.sh
 
-WORKDIR /mapper
+WORKDIR ${MAPPER_PATH_PREFIX}
 USER png-user
 
 FROM ubuntu:jammy
 ARG DEBIAN_FRONTEND=noninteractive
-ARG USER_ID
+ARG USER_ID=502
+ENV MAPPER_PATH_PREFIX /home/png-user/mapper
 
 RUN useradd -m -u ${USER_ID} png-user \
-    && mkdir -p /base/images
+    && mkdir -p ${MAPPER_PATH_PREFIX}/base/images
 
-COPY --from=builder /spack/opt/spack /spack/opt/spack
-COPY --from=builder --chown=${USER_ID} /mapper /mapper
+COPY --from=builder --chown=${USER_ID} ${MAPPER_PATH_PREFIX} ${MAPPER_PATH_PREFIX}
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
-    pip \
-    && python3 -m pip install /mapper/httpexec/ hypercorn \
-    && chmod +x /mapper/src/build/png_mapper_exe
+    pip
 
-WORKDIR /mapper
+
+RUN python3 -m pip install ${MAPPER_PATH_PREFIX}/httpexec/ hypercorn \
+    && chmod +x ${MAPPER_PATH_PREFIX}/src/build/png_mapper_exe \
+    && chown -R png-user /home/png-user
+
 USER png-user
-
+WORKDIR ${MAPPER_PATH_PREFIX}

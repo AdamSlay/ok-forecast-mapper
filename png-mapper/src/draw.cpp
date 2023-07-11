@@ -10,6 +10,8 @@
 #include "utils.h"
 #include "Shape.h"
 
+const std::string MAPPER_PATH_PREFIX {"/home/png-user/mapper"};
+
 void render_data(const std::vector<std::vector<std::string>>& csv, pngwriter& image, const bool isTemp) {
     /**
      * Render a blended circle at (X,Y) position of each data_point. The color of the circle corresponds to it's colormap value
@@ -77,7 +79,7 @@ void render_text(const std::vector<std::vector<std::string>>& csv, pngwriter& im
      * @isTemp: is it the temp csv? else, it's the wind csv-
      */
     int X{},Y{};
-    char* fontf {const_cast<char*>("/mapper/data/fonts/Nexa-Light.ttf")};  // using const_cast because plot_text() won't accept const char*
+    char* fontf {const_cast<char*>("/home/png-user/mapper/data/fonts/Nexa-Light.ttf")};  // using const_cast because plot_text() won't accept const char*
     int circle_radius {3};  // PNGwriter doesn't support const args
     int font_size {10};  // PNGwriter doesn't support const args
     double font_angle {0};  // PNGwriter doesn't support const args
@@ -110,7 +112,7 @@ void draw_temp(const std::vector<std::vector<Coordinate>>& shapes, const std::ve
      * @file: filename at end of path
      */
     spdlog::info("Starting draw_temp()");
-    std::string tempPath = "/base/images/maps/tair/" + path + file + ".png";
+    std::string tempPath {"/home/png-user/mapper/base/images/maps/tair/" + path + file + ".png"};
     char* p = const_cast<char *>(tempPath.c_str());
     pngwriter image(720,480,1.0,p);
 
@@ -130,7 +132,7 @@ void draw_wind(const std::vector<std::vector<Coordinate>>& shapes, const std::ve
      * @file: filename at end of path
      */
     spdlog::info("Starting draw_wind()");
-    std::string tempPath {"/base/images/maps/wspd/" + path + file + ".png"};
+    std::string tempPath {MAPPER_PATH_PREFIX + "/base/images/maps/wspd/" + path + file + ".png"};
     char* p = const_cast<char *>(tempPath.c_str());
     pngwriter image(720,480,1.0,p);
 

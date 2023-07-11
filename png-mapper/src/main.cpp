@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "draw.h"
 
+std::string MAPPER_PATH_PREFIX {"/home/png-user/mapper"};
 
 int main(int argc, char* argv[]) {
     try {
@@ -24,13 +25,13 @@ int main(int argc, char* argv[]) {
         spdlog::info("-----| png-writer started |-----");
 
         // read csv from shared vol & make dirs on host
-        std::string csv_full_path {"/mapper/vol/" + path + file + ".csv"};
+        std::string csv_full_path {"/home/png-user/mapper/vol/" + path + file + ".csv"};
         std::vector<std::vector<std::string>> data;
         data = CSVReader::read_csv(csv_full_path);
         make_dirs(path);
 
         // initialize shps object
-        Shape shape("/mapper/data/okcounties.shp");
+        Shape shape(MAPPER_PATH_PREFIX + "/data/okcounties.shp");
         auto shps {shape.get_shapes()};
 
         // draw maps
