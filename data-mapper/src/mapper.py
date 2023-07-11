@@ -12,6 +12,8 @@ import requests
 
 from src.api import Forecast
 
+MAPPER_PATH_PREFIX = '/home/mapper-user/mapper'
+
 # Initialize logger so it can be recognized globally
 mapper_log = logging.getLogger(f'data-mapper: {__name__}')
 
@@ -25,12 +27,12 @@ def init_logging() -> None:
     """
     Initialize logger and create /logs on host if not already created
     """
-    os.makedirs("/log/logs", exist_ok=True)
+    os.makedirs(f"{MAPPER_PATH_PREFIX}/log/logs", exist_ok=True)
     log_date = datetime.now(tz=ZoneInfo('US/Central')).strftime('%Y-%m-%d')
     log_time = datetime.now(tz=ZoneInfo('US/Central')).strftime('%Y-%m-%d %I:%M:%S')
     logging.basicConfig(format=f'[{log_time}]  [%(name)s]  [%(levelname).1s]  %(message)s',
                         encoding='utf-8',
-                        filename=f'/log/logs/{log_date}.log',
+                        filename=f'{MAPPER_PATH_PREFIX}/log/logs/{log_date}.log',
                         level=logging.INFO)
 
 
@@ -38,7 +40,7 @@ def make_shared_dirs() -> None:
     """
     Create shared data volume on docker network that links to png-mapper container
     """
-    dir_path = f'/vol/data-vol/{str(day)}'
+    dir_path = f'{MAPPER_PATH_PREFIX}/vol/data-vol/{str(day)}'
     os.makedirs(dir_path, exist_ok=True)
 
 
@@ -61,7 +63,7 @@ async def get_stations(state: str) -> None:
             tasks.append(fetch_data(station, session, stat_data))
         data = await asyncio.gather(*tasks)
 
-    fn = f"/vol/data-vol/{day}/{hour}.csv"
+    fn = f"{MAPPER_PATH_PREFIX}/vol/data-vol/{day}/{hour}.csv"
     write_csv(stat_data, fn)
 
 
@@ -95,7 +97,7 @@ def write_csv(stat_data: list, fn: str) -> None:
         write = csv.writer(file)
         write.writerow(fields)
         write.writerows(stat_data)
-    mapper_log.info(f'Successfully saved forecast data to /vol/data-vol/{day}/{fn}')
+    mapper_log.info(f'Successfully saved forecast data to {MAPPER_PATH_PREFIX}/vol/data-vol/{day}/{fn}')
 
 
 def command_request(host: str, port: int, command: str) -> None:

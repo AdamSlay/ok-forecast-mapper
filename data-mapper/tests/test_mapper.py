@@ -47,17 +47,17 @@ def test_init_logging(mocker):
     log_date = datetime.now(tz=ZoneInfo('US/Central')).strftime('%Y-%m-%d')
     log_time = datetime.now(tz=ZoneInfo('US/Central')).strftime('%Y-%m-%d %I:%M:%S')
 
-    assert m_makedirs.called_once_with('/log/logs', exist_ok=True)
+    assert m_makedirs.called_once_with('/home/mapper-user/mapper/log/logs', exist_ok=True)
     assert m_logging.called_once_with(format=f'[{log_time}]  [%(name)s]  [%(levelname).1s]  %(message)s',
                                       encoding='utf-8',
-                                      filename=f'/log/logs/{log_date}.log',
+                                      filename=f'/home/mapper-user/mapper/log/logs/{log_date}.log',
                                       level=logging.INFO)
 
 
 def test_make_shared_dirs(mocker):
     m_makedirs = mocker.patch('os.makedirs')
     make_shared_dirs()
-    assert m_makedirs.called_once_with(f'/vol/data-vol/{day}', exist_ok=True)
+    assert m_makedirs.called_once_with(f'/home/mapper-user/mapper/vol/data-vol/{day}', exist_ok=True)
 
 
 @pytest.mark.asyncio
@@ -88,7 +88,7 @@ async def test_fetch_data(mocker):
     assert m_Forecast.called_once_with([30.0, 97.0], m_session)
     assert m_Forecast.get_json.called_once()
     assert m_Forecast.get_forecast.called_once_with("test.forecast.url", [])
-    assert m_write_csv.called_once_with(test_stat_data, f'/vol/data-vol/{day}/{hour}.csv')
+    assert m_write_csv.called_once_with(test_stat_data, f'/home/mapper-user/mapper/vol/data-vol/{day}/{hour}.csv')
 
 
 def test_write_csv():
