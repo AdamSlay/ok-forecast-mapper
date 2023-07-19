@@ -3,7 +3,7 @@
 ### This is the rendering application that renders and saves the `.png` map images for `ok-forecast-mapper`
 
 ## Usage
-If you are wanting to run this container by itself without using the docker-compose file which builds and runs the entire application, you can do so by running the following commands to build and run the image:
+If you are wanting to run this container by itself without using the docker-compose file which builds and runs the entire application, you can do so by running the following commands to build and run the image(make sure to change COMPOSE_OR_STANDALONE_HOST_PATH to STANDALONE inside the Dockerfile):
 ```bash
 docker build -t ofm-png-mapper ./<path-to-Dockerfile>
 ```
