@@ -1,6 +1,6 @@
 FROM ubuntu:jammy as builder
 ARG DEBIAN_FRONTEND=noninteractive
-ARG USER_ID=502
+ARG USER_ID
 ENV MAPPER_PATH_PREFIX /home/png-user/mapper
 ENV COMPOSE png-mapper
 ENV STANDALONE .
@@ -30,7 +30,7 @@ RUN cd ${MAPPER_PATH_PREFIX} \
 
 FROM builder as test
 ARG DEBIAN_FRONTEND=noninteractive
-ARG USER_ID=502
+ARG USER_ID
 ENV MAPPER_PATH_PREFIX /home/png-user/mapper
 
 RUN chown -R png-user ${MAPPER_PATH_PREFIX} \
@@ -41,7 +41,7 @@ USER png-user
 
 FROM ubuntu:jammy
 ARG DEBIAN_FRONTEND=noninteractive
-ARG USER_ID=502
+ARG USER_ID
 ENV MAPPER_PATH_PREFIX /home/png-user/mapper
 
 RUN useradd -m -u ${USER_ID} png-user \

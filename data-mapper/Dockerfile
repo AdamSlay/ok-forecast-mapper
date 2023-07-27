@@ -1,6 +1,6 @@
 FROM python:3.10 AS builder
 
-ARG USER_ID=502
+ARG USER_ID
 ENV COMPOSE data-mapper/
 ENV STANDALONE .
 ENV COMPOSE_OR_STANDALONE_HOST_PATH ${COMPOSE}
@@ -26,7 +26,7 @@ RUN cd ${MAPPER_PATH_PREFIX} \
     && pip install .
 
 FROM builder as test
-ARG USER_ID=502
+ARG USER_ID
 ENV MAPPER_PATH_PREFIX /home/mapper-user/mapper
 
 RUN mkdir -p ${MAPPER_PATH_PREFIX}/vol/data-vol ${MAPPER_PATH_PREFIX}/log
@@ -41,7 +41,7 @@ WORKDIR ${MAPPER_PATH_PREFIX}
 USER mapper-user
 
 FROM builder
-ARG USER_ID=502
+ARG USER_ID
 ENV MAPPER_PATH_PREFIX /home/mapper-user/mapper
 
 RUN mkdir -p ${MAPPER_PATH_PREFIX}/vol/data-vol ${MAPPER_PATH_PREFIX}/log \
